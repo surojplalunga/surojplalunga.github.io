@@ -85,8 +85,10 @@
   .statusline .spacer { flex: 1; }
   .statusline .clock { color: var(--text-dim); }
 
-  .workspace { flex: 1; display: flex; min-height: 0; }
-  .sidebar { width: 238px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--line); padding: 18px 0; overflow-y: auto; transition: width 0.15s; }
+  .workspace { flex: 1; display: flex; min-height: 0; position: relative; }
+
+  /* Sidebar */
+  .sidebar { width: 238px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--line); padding: 18px 0; overflow-y: auto; transition: transform 0.2s; z-index: 50; }
   .sidebar.collapsed { display: none; }
   .sidebar .path { padding: 0 18px 12px; font-size: 0.72rem; color: var(--text-dimmer); }
   .tree-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 18px; background: none; border: none; color: var(--text-dim); font-size: 0.85rem; cursor: pointer; transition: background-color .12s, color .12s; border-left: 2px solid transparent; }
@@ -96,6 +98,10 @@
   .sidebar-hint { margin-top: 20px; padding: 12px 18px; border-top: 1px solid var(--line); font-size: 0.68rem; color: var(--text-dimmer); line-height: 1.9; }
   .sidebar-hint kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--text-dim); }
 
+  /* Backdrop for mobile sidebar */
+  .sidebar-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 49; }
+
+  /* Main */
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .bufferline { display: flex; align-items: center; background: var(--bg2); border-bottom: 1px solid var(--line); overflow-x: auto; }
   .buffer-tab { padding: 6px 14px; border-right: 1px solid var(--line); color: var(--text-dimmer); cursor: pointer; white-space: nowrap; transition: background .12s, color .12s; font-size: 0.78rem; }
@@ -110,6 +116,7 @@
   .buffer h2:first-of-type { margin-top: 8px; }
   .buffer p { margin: 0 0 14px; color: var(--text); font-size: 0.98rem; line-height: 1.75; }
   .buffer p.dim { color: var(--text-dim); }
+
   .lines { counter-reset: line; border-left: 1px solid var(--line); margin-left: 2px; }
   .line { counter-increment: line; position: relative; padding-left: 44px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.7; color: var(--text); }
   .line::before { content: counter(line); position: absolute; left: -2px; top: 0; width: 36px; text-align: right; transform: translateX(-100%); margin-left: -6px; font-size: 0.72rem; color: var(--text-dimmer); padding-right: 12px; }
@@ -169,12 +176,71 @@
   .toast { position: fixed; bottom: 52px; right: 20px; background: var(--panel); border: 1px solid var(--line); padding: 9px 16px; border-radius: 4px; font-size: 0.8rem; color: var(--text); opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 99; }
   .toast.show { opacity: 1; transform: translateY(0); }
 
-  @media (max-width: 760px) {
-    .sidebar { width: 170px; position: absolute; height: 100%; z-index: 50; }
-    .buffer { padding: 32px 22px 60px; }
+  /* ==================== MOBILE RESPONSIVE ==================== */
+  @media (max-width: 768px) {
+    .statusline { font-size: 0.68rem; gap: 8px; padding: 0 8px; }
+    .statusline .clock { display: none; }
+    .statusline .spacer { flex: 0; }
+    .mode-pill { padding: 2px 6px; font-size: 0.65rem; }
+
+    .workspace { flex-direction: column; }
+
+    .sidebar {
+      position: fixed;
+      top: 34px; /* statusline height */
+      left: 0;
+      bottom: 0;
+      width: 260px;
+      transform: translateX(-100%);
+      z-index: 100;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
+    }
+    .sidebar.open { transform: translateX(0); }
+    .sidebar-backdrop { display: none; }
+    .sidebar-backdrop.visible { display: block; }
+
+    .main { width: 100%; }
+
+    .bufferline { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+    .buffer-tab { padding: 6px 10px; font-size: 0.7rem; }
+
+    .main-content { overflow-y: auto; }
+
+    .buffer {
+      padding: 24px 20px 80px;
+      max-width: 100%;
+    }
     .buffer h1 { font-size: 2rem; }
-    .toml-key { width: 120px; }
+    .buffer h2 { font-size: 0.85rem; }
+    .buffer p, .line { font-size: 0.88rem; }
+
+    .lines { border-left: none; margin-left: 0; }
+    .line { padding-left: 0; }
+    .line::before { display: none; }
+
+    .toml-row { flex-direction: column; gap: 4px; }
+    .toml-key { width: auto; }
+
+    .proj-grid { grid-template-columns: 1fr; }
+
+    .pdf-item { font-size: 0.78rem; flex-wrap: wrap; }
+    .pdf-item .size { margin-left: auto; }
+
     .zathura-viewer { height: 400px; }
+
+    .contact-row { flex-wrap: wrap; }
+    .contact-row .k { width: 60px; }
+
+    .cmdbar input { font-size: 0.8rem; }
+    .cmdbar .cmd-hint { display: none; }
+    .toast { bottom: 60px; right: 10px; max-width: calc(100% - 20px); }
+  }
+
+  @media (max-width: 480px) {
+    .buffer { padding: 16px 14px 80px; }
+    .buffer h1 { font-size: 1.8rem; }
+    .buffer p { font-size: 0.8rem; }
+    .zathura-viewer { height: 300px; }
   }
 </style>
 </head>
@@ -195,6 +261,8 @@
 </div>
 
 <div class="workspace">
+  <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
+
   <aside class="sidebar" id="sidebar">
     <div class="path">~/suroj-plalunga</div>
     <button class="tree-item active" data-section="about" data-mode="NORMAL" data-color="#7AA2F7" role="tab" aria-selected="true">
@@ -274,7 +342,7 @@
         </div>
       </section>
 
-      <!-- PROJECTS (from manifest.json) -->
+      <!-- PROJECTS -->
       <section class="buffer" data-section="projects" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/projects/ — <span id="repo-count">loading...</span></span>
         <h1>projects</h1>
@@ -288,7 +356,7 @@
         </div>
       </section>
 
-      <!-- NOTES & PDFs (from manifest.json) -->
+      <!-- NOTES -->
       <section class="buffer" data-section="notes" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">loading...</span></span>
         <h1>notes & proofs</h1>
@@ -364,16 +432,39 @@ function tick() {
 }
 tick(); setInterval(tick, 60000);
 
-/* ---------------- toggle sidebar ---------------- */
+/* ---------------- toggle sidebar (mobile overlay) ---------------- */
 const sidebar = document.getElementById('sidebar');
+const backdrop = document.getElementById('sidebar-backdrop');
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 
+function openSidebar() {
+  sidebar.classList.add('open');
+  backdrop.classList.add('visible');
+}
+function closeSidebar() {
+  sidebar.classList.remove('open');
+  backdrop.classList.remove('visible');
+}
 function toggleSidebar() {
-  sidebar.classList.toggle('collapsed');
-  const open = !sidebar.classList.contains('collapsed');
-  showToast(open ? 'Neo-tree opened' : 'Neo-tree closed');
+  if (sidebar.classList.contains('open')) {
+    closeSidebar();
+    showToast('Neo-tree closed');
+  } else {
+    openSidebar();
+    showToast('Neo-tree opened');
+  }
 }
 btnToggleSidebar.addEventListener('click', toggleSidebar);
+backdrop.addEventListener('click', closeSidebar);
+
+// Close sidebar when selecting a section on mobile
+const originalGoTo = goTo;
+window.goTo = function(section) {
+  originalGoTo(section);
+  if (window.innerWidth <= 768) {
+    closeSidebar();
+  }
+};
 
 /* ---------------- bufferline ---------------- */
 const treeItems = Array.from(document.querySelectorAll('.tree-item'));
@@ -524,7 +615,6 @@ function closePdf() {
 }
 
 /* ---------------- STATIC MANIFEST LOADER ---------------- */
-// IMPORTANT: your repos live under 'u9iver63', so use that to build raw URLs
 const GITHUB_USER = 'u9iver63';
 
 async function loadContent() {
@@ -560,7 +650,6 @@ async function loadContent() {
 
     if (repos.length === 0) throw new Error('No repos found in manifest');
 
-    // --- Projects ---
     projLoading.remove();
     const displayedRepos = repos.slice(0, 12);
     repoCount.textContent = displayedRepos.length + ' repos';
@@ -586,7 +675,6 @@ async function loadContent() {
       projGrid.appendChild(card);
     });
 
-    // --- Collect PDFs & MDs ---
     let allPdfs = [];
     let allMds = [];
     repos.forEach(repo => {
@@ -608,7 +696,6 @@ async function loadContent() {
       });
     });
 
-    // --- Render PDFs ---
     pdfLoading.remove();
     if (allPdfs.length === 0) {
       pdfContainer.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
@@ -626,7 +713,6 @@ async function loadContent() {
       });
     }
 
-    // --- Render Markdown notes ---
     mdLoading.remove();
     if (allMds.length === 0) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
