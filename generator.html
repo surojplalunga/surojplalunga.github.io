@@ -1,1 +1,78 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>manifest.json generator</title>
+<style>
+  body { background:#1A1B26; color:#C0CAF5; font-family:sans-serif; max-width:500px; margin:40px auto; }
+  input, button { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
+  button { background:#7AA2F7; border:none; color:#1A1B26; font-weight:bold; cursor:pointer; }
+  #status { margin-top:10px; color:#9ECE6A; }
+</style>
+</head>
+<body>
+<h2>Generate manifest.json</h2>
+<label>GitHub username</label>
+<input id="username" placeholder="u9iver63" />
+<label>Personal access token (needs <code>public_repo</code> scope)</label>
+<input id="token" type="password" placeholder="ghp_..." />
+<button onclick="generate()">Generate & Download</button>
+<div id="status"></div>
+<script>
+async function generate() {
+  const username = document.getElementById('username').value.trim();
+  const token = document.getElementById('token').value.trim();
+  const status = document.getElementById('status');
+  if (!username || !token) { status.textContent = 'Please fill both fields.'; return; }
+
+  status.textContent = 'Fetching repositories…';
+  const headers = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' };
+
+  try {
+    // 1. Get all non-fork repos
+    const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, { headers });
+    const repos = await reposRes.json();
+    const ownRepos = repos.filter(r => !r.fork);
+
+    status.textContent = `Found ${ownRepos.length} repos. Scanning files…`;
+    const result = [];
+
+    for (const repo of ownRepos) {
+      const branch = repo.default_branch || 'main';
+      try {
+        const treeRes = await fetch(
+          `https://api.github.com/repos/${username}/${repo.name}/git/trees/${branch}?recursive=1`,
+          { headers }
+        );
+        const treeData = await treeRes.json();
+        const tree = treeData.tree || [];
+        const pdfs = tree
+          .filter(i => i.type === 'blob' && i.path.toLowerCase().endsWith('.pdf'))
+          .map(i => ({ path: i.path, size: i.size }));
+        const mds = tree
+          .filter(i => i.type === 'blob' && i.path.toLowerCase().endsWith('.md'))
+          .map(i => ({ path: i.path }));
+        result.push({ ...repo, pdfs, mds });
+        status.textContent = `Scanned ${repo.name}…`;
+      } catch (e) {
+        result.push({ ...repo, pdfs: [], mds: [] });
+      }
+    }
+
+    // Create downloadable JSON
+    const blob = new Blob([JSON.stringify(result, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'manifest.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    status.textContent = 'manifest.json downloaded! Place it next to your index.html.';
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
