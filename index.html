@@ -29,8 +29,8 @@
 }
 </script>
 
-<!-- Libraries: highlight.js, marked, KaTeX -->
-<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+<!-- Libraries: highlight.js, marked, KaTeX, GitHub Markdown CSS -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/haskell.min.js"></script>
@@ -39,6 +39,8 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/lean.min.js"></script>
 
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.0/marked.min.js"></script>
+
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.css">
 
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
 <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
@@ -160,7 +162,6 @@
   .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
   .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
   .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
-  .note-body-inner img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
 
   .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
   .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -472,26 +473,25 @@ const GITHUB_USER = 'u9iver63';
 const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
 const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`;
 
-// Make RESUME_URL globally accessible for the inline onclick button
 window.RESUME_URL = RESUME_URL;
 
 /* ---------------- Markdown & highlight.js & KaTeX config ---------------- */
-// Wait for all deferred scripts to load before configuring marked
 window.addEventListener('DOMContentLoaded', function () {
   if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
     marked.setOptions({
+      gfm: true,
+      breaks: true,
       highlight: function(code, lang) {
         if (lang && hljs.getLanguage(lang)) {
           try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
         }
         return hljs.highlightAuto(code).value;
-      },
-      breaks: true
+      }
     });
   }
 });
 
-function renderMarkdown(rawText, targetElement) {
+function renderMarkdown(rawText, targetElement, fileRawUrl) {
   if (typeof marked === 'undefined') {
     targetElement.textContent = rawText;
     return;
@@ -511,12 +511,21 @@ function renderMarkdown(rawText, targetElement) {
     } catch(e) {}
   }
 
-  // Re-apply highlight.js to any code blocks that may have been added after Markdown parsing
+  // Re-highlight any code blocks
   if (typeof hljs !== 'undefined') {
     targetElement.querySelectorAll('pre code').forEach(block => {
       hljs.highlightElement(block);
     });
   }
+
+  // Fix relative image sources
+  const baseRawUrl = fileRawUrl.substring(0, fileRawUrl.lastIndexOf('/') + 1);
+  targetElement.querySelectorAll('img').forEach(img => {
+    const src = img.getAttribute('src');
+    if (src && !src.startsWith('http') && !src.startsWith('//')) {
+      img.src = baseRawUrl + src;
+    }
+  });
 }
 
 /* ---------------- clock ---------------- */
@@ -743,17 +752,15 @@ document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && searchPa
 /* ---------------- LOAD NOW.MD ---------------- */
 async function loadNow() {
   const container = document.getElementById('now-content');
-  const updatedSpan = document.getElementById('now-updated');
   try {
     const res = await fetch(NOW_MD_URL);
     if (!res.ok) throw new Error('Failed to fetch now.md');
     const rawText = await res.text();
     container.innerHTML = '';
     const div = document.createElement('div');
-    div.style.padding = '0';
-    renderMarkdown(rawText, div);
+    div.className = 'markdown-body';
+    renderMarkdown(rawText, div, NOW_MD_URL);
     container.appendChild(div);
-    updatedSpan.textContent = '';
   } catch (e) {
     container.innerHTML = '<p class="dim">Could not load now.md.</p>';
   }
@@ -834,7 +841,7 @@ async function loadContent() {
       allMds.forEach(md => {
         const noteDiv = document.createElement('div');
         noteDiv.className = 'note-item';
-        noteDiv.innerHTML = `<button class="note-head"><span>${md.name}</span><span class="date">${md.repo}</span><span class="arrow">›</span></button><div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
+        noteDiv.innerHTML = `<button class="note-head"><span>${md.name}</span><span class="date">${md.repo}</span><span class="arrow">›</span></button><div class="note-body"><div class="note-body-inner markdown-body">Loading...</div></div>`;
         mdContainer.appendChild(noteDiv);
         const headBtn = noteDiv.querySelector('.note-head');
         const bodyInner = noteDiv.querySelector('.note-body-inner');
@@ -845,7 +852,7 @@ async function loadContent() {
               const res = await fetch(md.url);
               if (!res.ok) throw new Error('Failed to fetch');
               const rawText = await res.text();
-              renderMarkdown(rawText, bodyInner);
+              renderMarkdown(rawText, bodyInner, md.url);
             } catch (err) {
               bodyInner.textContent = 'Error loading content.';
             }
