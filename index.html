@@ -339,7 +339,7 @@
 const GITHUB_USER = 'u9iver63';
 const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
 const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`;
-const YOUTUBE_CHANNEL_ID = 'UCcdfcSE9TOn0x0YH8qn18Ig';   // Valid channel ID
+const YOUTUBE_CHANNEL_ID = 'UCcdfcSE9TOn0x0YH8qn18Ig';
 
 window.RESUME_URL = RESUME_URL;
 
@@ -557,6 +557,7 @@ const mediaFrame = document.getElementById('pdf-frame');
 const mediaTitle = document.getElementById('zathura-title');
 
 function openMedia(url, title) {
+  if (!mediaViewer || !mediaFrame || !mediaTitle) return;
   let embedUrl = url;
   if (url.includes('youtube.com/embed/') || url.includes('youtube.com/watch')) {
     if (url.includes('youtube.com/watch')) {
@@ -573,9 +574,9 @@ function openMedia(url, title) {
 }
 
 function closeMedia() {
-  if (mediaViewer.classList.contains('active')) {
+  if (mediaViewer && mediaViewer.classList.contains('active')) {
     mediaViewer.classList.remove('active');
-    mediaFrame.src = "";
+    if (mediaFrame) mediaFrame.src = "";
     showToast('Closed viewer');
   }
 }
@@ -629,9 +630,10 @@ function performSearch(query) {
 function closeSearch() { searchPanel.classList.remove('show'); }
 document.addEventListener('click', (e) => { if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch(); });
 
-/* ---------------- LOAD NOW.MD ---------------- */
+/* ---------------- LOAD NOW.MD (safe) ---------------- */
 async function loadNow() {
   const container = document.getElementById('now-content');
+  if (!container) return;
   try {
     const res = await fetch(NOW_MD_URL);
     if (!res.ok) throw new Error('Failed to fetch now.md');
@@ -642,7 +644,7 @@ async function loadNow() {
     renderMarkdown(rawText, div, NOW_MD_URL);
     container.appendChild(div);
   } catch (e) {
-    container.innerHTML = '<p class="dim">Could not load now.md.</p>';
+    container.innerHTML = '<p class="dim">Could not load now.md (maybe the file is missing).</p>';
   }
 }
 
