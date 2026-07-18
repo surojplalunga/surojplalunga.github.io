@@ -12,6 +12,28 @@
 
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,wght@1,400;1,500&display=swap" rel="stylesheet">
+
+<!-- JSON‑LD Person Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Person",
+  "name": "Suroj Plalunga",
+  "givenName": "Suroj",
+  "familyName": "Plalunga",
+  "description": "BSc Mathematics student at Tribhuvan University, Nepal. Enthusiast in algebraic geometry, formal methods, and developer tooling. Neovim, Arch Linux, Hyprland user.",
+  "url": "https://surojplalunga.github.io",
+  "sameAs": [
+    "https://github.com/surojplalunga"
+  ],
+  "knowsAbout": ["Mathematics", "Algebraic Geometry", "Formal Methods", "Lean 4", "Typst", "Arch Linux", "Neovim", "C++", "Haskell", "Mathematical Physics"],
+  "alumniOf": {
+    "@type": "CollegeOrUniversity",
+    "name": "Amrit Science Campus, Tribhuvan University"
+  }
+}
+</script>
+
 <style>
   :root {
     --bg: #1A1B26;
@@ -46,7 +68,6 @@
   button { font-family: inherit; cursor: pointer; }
   *:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
 
-  /* custom scrollbar */
   ::-webkit-scrollbar { width: 8px; }
   ::-webkit-scrollbar-track { background: var(--bg2); }
   ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 4px; }
@@ -76,14 +97,10 @@
   .sidebar-hint kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--text-dim); }
 
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
-
-  /* bufferline */
   .bufferline { display: flex; align-items: center; background: var(--bg2); border-bottom: 1px solid var(--line); overflow-x: auto; }
   .buffer-tab { padding: 6px 14px; border-right: 1px solid var(--line); color: var(--text-dimmer); cursor: pointer; white-space: nowrap; transition: background .12s, color .12s; font-size: 0.78rem; }
   .buffer-tab:hover { background: var(--panel); color: var(--text); }
   .buffer-tab.active { color: var(--text); background: var(--panel); border-bottom: 2px solid var(--blue); }
-  .buffer-tab .modified { color: var(--yellow); font-weight: 700; margin-left: 4px; }
-
   .main-content { flex: 1; overflow-y: auto; position: relative; }
   .buffer { display: none; padding: 48px 56px 64px; max-width: 760px; }
   .buffer.active { display: block; }
@@ -93,21 +110,18 @@
   .buffer h2:first-of-type { margin-top: 8px; }
   .buffer p { margin: 0 0 14px; color: var(--text); font-size: 0.98rem; line-height: 1.75; }
   .buffer p.dim { color: var(--text-dim); }
-
   .lines { counter-reset: line; border-left: 1px solid var(--line); margin-left: 2px; }
   .line { counter-increment: line; position: relative; padding-left: 44px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.7; color: var(--text); }
   .line::before { content: counter(line); position: absolute; left: -2px; top: 0; width: 36px; text-align: right; transform: translateX(-100%); margin-left: -6px; font-size: 0.72rem; color: var(--text-dimmer); padding-right: 12px; }
   .line .kw { color: var(--magenta); }
   .line .str { color: var(--green); }
   .line .cm { color: var(--text-dimmer); font-style: italic; }
-
   .toml-block { font-size: 0.9rem; }
   .toml-section { color: var(--blue); margin: 22px 0 10px; }
   .toml-row { display: flex; gap: 10px; padding: 3px 0; }
   .toml-key { color: var(--cyan); width: 170px; flex-shrink: 0; }
   .toml-eq { color: var(--text-dimmer); }
   .toml-val { color: var(--green); }
-
   .proj-grid { display: grid; gap: 14px; margin-top: 6px; }
   .proj-card { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; border-left: 3px solid var(--green); transition: border-color 0.2s, background 0.2s; }
   .proj-card:hover { border-left-color: var(--blue); background: #252836; }
@@ -120,7 +134,6 @@
   .proj-card a.repo-link { text-decoration: none; border-bottom: none; color: inherit; display: block; }
   .proj-card a.repo-link:hover { color: inherit; }
   .loading-placeholder { color: var(--text-dimmer); text-align: center; padding: 20px; border: 1px dashed var(--line); border-radius: 4px; margin: 20px 0; }
-
   .note-item { border-bottom: 1px solid var(--line); }
   .note-head { width: 100%; background: none; border: none; text-align: left; padding: 14px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); font-size: 0.88rem; }
   .note-head .arrow { color: var(--magenta); transition: transform .18s; flex-shrink: 0; margin-left: 12px; }
@@ -129,19 +142,16 @@
   .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
   .note-item.open .note-body { max-height: 300px; overflow-y: auto; }
   .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
-
   .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
   .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
   .pdf-item:hover { border-color: var(--blue); background: var(--panel); }
   .pdf-item .size { color: var(--text-dimmer); font-size: 0.7rem; }
-
   .zathura-viewer { display: none; flex-direction: column; height: 600px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 32px; }
   .zathura-viewer.active { display: flex; }
   .zathura-bar { background: var(--bg2); padding: 8px 12px; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); align-items: center; }
   .zathura-bar button { background: var(--panel); border: 1px solid var(--line); color: var(--red); border-radius: 3px; padding: 2px 8px; cursor: pointer; transition: .2s; }
   .zathura-bar button:hover { background: var(--red); color: var(--bg2); }
   iframe.pdf-frame { flex: 1; width: 100%; border: none; background: #ececec; }
-
   .contact-block { font-size: 0.92rem; }
   .contact-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
   .contact-row .k { color: var(--red); width: 80px; flex-shrink: 0; }
@@ -150,14 +160,12 @@
   .copy-btn:hover { color: var(--text); border-color: var(--text-dim); }
   .status-echo { margin-top: 22px; color: var(--text-dim); }
   .status-echo .prompt { color: var(--green); }
-
   .cmdbar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg2); border-top: 1px solid var(--line); display: none; align-items: center; padding: 8px 16px; font-size: 0.88rem; z-index: 100; }
   .cmdbar.show { display: flex; }
   .cmdbar .colon { color: var(--yellow); margin-right: 4px; }
   .cmdbar input { flex: 1; background: none; border: none; color: var(--text); font-size: 0.9rem; }
   .cmdbar input:focus { outline: none; }
   .cmdbar .cmd-hint { color: var(--text-dimmer); font-size: 0.72rem; }
-
   .toast { position: fixed; bottom: 52px; right: 20px; background: var(--panel); border: 1px solid var(--line); padding: 9px 16px; border-radius: 4px; font-size: 0.8rem; color: var(--text); opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 99; }
   .toast.show { opacity: 1; transform: translateY(0); }
 
@@ -221,9 +229,9 @@
         <h1>Suroj Plalunga</h1>
         <p class="dim">BSc Mathematics · Tribhuvan University, Nepal</p>
 
-        <h2>$whoami </h2>
+        <h2>$whoami</h2>
+        <p>My name is <strong>Suroj Plalunga</strong>. I am a BSc Mathematics student at Tribhuvan University, Nepal.</p>
         <div class="lines">
-          <p>My name is <strong>Suroj Plalunga</strong>. I am a BSc Mathematics student at Tribhuvan University, Nepal.</p>
           <p class="line">I split my time between proofs and terminals — Graph theory, real analysis and topology on one side of the desk, a heavily customized <span class="kw">Arch Linux</span> + <span class="kw">Hyprland</span> setup on the other.</p>
           <p class="line"></p>
           <p class="line">My daily driver is <span class="kw">Neovim</span> (Native Package Manger Vim.Pack ) with <span class="kw">tinymist</span> for Typst, <span class="kw">Zathura</span> for bidirectionally-synced PDF preview, and <span class="kw">tmux</span> holding it all together.</p>
@@ -323,8 +331,8 @@
           </div>
           <div class="contact-row">
             <span class="k">github</span>
-            <span class="v"><a href="https://github.com/u9iver63" target="_blank" rel="noopener noreferrer">github.com/u9iver63</a></span>
-            <button class="copy-btn" data-copy="github.com/u9iver63">copy</button>
+            <span class="v"><a href="https://github.com/surojplalunga" target="_blank" rel="noopener noreferrer">github.com/surojplalunga</a></span>
+            <button class="copy-btn" data-copy="github.com/surojplalunga">copy</button>
           </div>
           <div class="contact-row">
             <span class="k">location</span>
@@ -516,7 +524,8 @@ function closePdf() {
 }
 
 /* ---------------- STATIC MANIFEST LOADER ---------------- */
-const GITHUB_USER = 'u9iver63';   // <-- change to your GitHub username
+// IMPORTANT: your repos live under 'u9iver63', so use that to build raw URLs
+const GITHUB_USER = 'u9iver63';
 
 async function loadContent() {
   const projGrid = document.getElementById('proj-grid-container');
@@ -534,11 +543,9 @@ async function loadContent() {
   const mdLoading = document.getElementById('loading-markdown');
   const retryNotes = document.getElementById('retry-notes');
 
-  // Hide retries
   retryProj.style.display = 'none';
   retryNotes.style.display = 'none';
 
-  // Clear existing content
   projGrid.innerHTML = ''; projGrid.appendChild(projLoading);
   pdfContainer.innerHTML = ''; pdfContainer.appendChild(pdfLoading);
   mdContainer.innerHTML = ''; mdContainer.appendChild(mdLoading);
@@ -551,9 +558,7 @@ async function loadContent() {
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const repos = await res.json();
 
-    if (repos.length === 0) {
-      throw new Error('No repos found in manifest');
-    }
+    if (repos.length === 0) throw new Error('No repos found in manifest');
 
     // --- Projects ---
     projLoading.remove();
@@ -581,7 +586,7 @@ async function loadContent() {
       projGrid.appendChild(card);
     });
 
-    // --- Collect PDFs & MDs from all repos ---
+    // --- Collect PDFs & MDs ---
     let allPdfs = [];
     let allMds = [];
     repos.forEach(repo => {
@@ -684,32 +689,12 @@ function formatSize(bytes) {
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-// Start
 loadContent();
-  // for gogole
-{
-  "@context": "https://schema.org",
-  "@type": "Person",
-  "name": "Suroj Plalunga",
-  "givenName": "Suroj",
-  "familyName": "Plalunga",
-  "description": "BSc Mathematics student at Tribhuvan University, Nepal. Enthusiast in algebraic geometry, formal methods, and developer tooling. Neovim, Arch Linux, Hyprland user.",
-  "url": "https://surojplalunga.github.io",
-  "sameAs": [
-    "https://github.com/u9iver63",
-    "https://linkedin.com/in/surojplalunga"   // add if you have one
-  ],
-  "knowsAbout": ["Mathematics", "Algebraic Geometry", "Formal Methods", "Lean 4", "Typst", "Arch Linux", "Neovim","C++","Haskell","Mathematical Physic"],
-  "alumniOf": {
-    "@type": "Amrit Science Campus",
-    "name": "Tribhuvan University"
-  }
-}
 </script>
 
 <noscript>
   <div style="color:var(--text);padding:20px;text-align:center;">
-    This terminal requires JavaScript. Please enable it or visit my <a href="https://github.com/u9iver63">GitHub</a>.
+    This terminal requires JavaScript. Please enable it or visit my <a href="https://github.com/surojplalunga">GitHub</a>.
   </div>
 </noscript>
 
