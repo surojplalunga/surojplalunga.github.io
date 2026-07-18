@@ -23,18 +23,13 @@
   "familyName": "Plalunga",
   "description": "BSc Mathematics student at Tribhuvan University, Nepal. Enthusiast in algebraic geometry, formal methods, and developer tooling. Neovim, Arch Linux, Hyprland user.",
   "url": "https://surojplalunga.github.io",
-  "sameAs": [
-    "https://github.com/surojplalunga"
-  ],
-  "knowsAbout": ["Mathematics", "Algebraic Geometry", "Formal Methods", "Lean 4", "Typst", "Arch Linux", "Neovim", "C++", "Haskell", "Mathematical Physics"],
-  "alumniOf": {
-    "@type": "CollegeOrUniversity",
-    "name": "Amrit Science Campus, Tribhuvan University"
-  }
+  "sameAs": ["https://github.com/surojplalunga"],
+  "knowsAbout": ["Mathematics","Algebraic Geometry","Formal Methods","Lean 4","Typst","Arch Linux","Neovim","C++","Haskell","Mathematical Physics"],
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "Amrit Science Campus, Tribhuvan University" }
 }
 </script>
 
-<!-- highlight.js for syntax highlighting -->
+<!-- highlight.js -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
@@ -43,7 +38,11 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/lean.min.js"></script>
 
+<!-- marked for Markdown rendering -->
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.0/marked.min.js"></script>
+
 <style>
+  /* ---------- identical CSS as before, unchanged ---------- */
   :root {
     --bg: #1A1B26;
     --bg2: #16161E;
@@ -95,7 +94,6 @@
   .statusline .clock { color: var(--text-dim); }
 
   .workspace { flex: 1; display: flex; min-height: 0; position: relative; }
-
   .sidebar { width: 238px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--line); padding: 18px 0; overflow-y: auto; transition: transform 0.25s ease; z-index: 50; }
   .sidebar.collapsed { display: none; }
   .sidebar .path { padding: 0 18px 12px; font-size: 0.72rem; color: var(--text-dimmer); }
@@ -156,7 +154,7 @@
   .note-item.open .arrow { transform: rotate(90deg); }
   .note-head .date { color: var(--text-dimmer); font-size: 0.76rem; margin-right: auto; margin-left: 14px; }
   .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
-  .note-item.open .note-body { max-height: 300px; overflow-y: auto; }
+  .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
   .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
 
   .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
@@ -191,22 +189,12 @@
 
   /* Floating panels (help, search results) */
   .floating-panel {
-    position: fixed;
-    top: 50%; left: 50%;
-    transform: translate(-50%, -50%);
-    background: var(--bg2);
-    border: 2px solid var(--blue);
-    border-radius: 6px;
-    padding: 20px 24px;
-    z-index: 200;
-    display: none;
-    width: 500px;
-    max-width: 90vw;
-    max-height: 80vh;
-    overflow-y: auto;
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: var(--bg2); border: 2px solid var(--blue); border-radius: 6px;
+    padding: 20px 24px; z-index: 200; display: none;
+    width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto;
     box-shadow: 0 8px 24px rgba(0,0,0,0.8);
-    font-size: 0.85rem;
-    color: var(--text);
+    font-size: 0.85rem; color: var(--text);
   }
   .floating-panel.show { display: block; }
   .floating-panel h3 { margin-top: 0; color: var(--blue); }
@@ -214,55 +202,29 @@
   .floating-panel li { margin-bottom: 6px; }
   .floating-panel .key { color: var(--magenta); }
   .floating-panel .close-btn {
-    position: absolute;
-    top: 8px;
-    right: 12px;
-    background: none;
-    border: none;
-    color: var(--red);
-    cursor: pointer;
-    font-size: 1.2rem;
+    position: absolute; top: 8px; right: 12px;
+    background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.2rem;
   }
 
-  /* Search result items */
-  .search-item {
-    padding: 6px 0;
-    border-bottom: 1px solid var(--line);
-    cursor: pointer;
-  }
+  .search-item { padding: 6px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
   .search-item:hover { color: var(--blue); }
   .search-item .type { color: var(--text-dimmer); font-size: 0.7rem; }
 
-  /* Contact form */
   .contact-form input, .contact-form textarea {
-    width: 100%;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 0.9rem;
-    padding: 8px;
-    margin: 5px 0 12px;
-    border-radius: 4px;
+    width: 100%; background: var(--bg); border: 1px solid var(--line);
+    color: var(--text); font-family: inherit; font-size: 0.9rem;
+    padding: 8px; margin: 5px 0 12px; border-radius: 4px;
   }
   .contact-form button[type="submit"] {
-    background: var(--blue);
-    border: none;
-    color: var(--bg2);
-    padding: 8px 16px;
-    cursor: pointer;
-    font-weight: 700;
+    background: var(--blue); border: none; color: var(--bg2);
+    padding: 8px 16px; cursor: pointer; font-weight: 700;
   }
 
-  /* ==================== MOBILE RESPONSIVE ==================== */
   @media (max-width: 768px) {
     .statusline { font-size: 0.68rem; gap: 8px; padding: 0 8px; }
     .statusline .clock { display: none; }
     .mode-pill { padding: 2px 6px; font-size: 0.65rem; }
-    .sidebar {
-      position: fixed; top: 34px; left: 0; bottom: 0; width: 260px;
-      transform: translateX(-100%); z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    }
+    .sidebar { position: fixed; top: 34px; left: 0; bottom: 0; width: 260px; transform: translateX(-100%); z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
     .sidebar.open { transform: translateX(0); }
     .sidebar-backdrop.visible { display: block; }
     .buffer { padding: 24px 20px 80px; max-width: 100%; }
@@ -331,7 +293,6 @@
         <span class="filename-tag">~/suroj-plalunga/about.md — 1 buffer</span>
         <h1>Suroj Plalunga</h1>
         <p class="dim">BSc Mathematics · Tribhuvan University, Nepal</p>
-
         <p>My name is <strong>Suroj Plalunga</strong>. I am a BSc Mathematics student at Tribhuvan University, Nepal.</p>
         <div class="lines">
           <p class="line">I split my time between proofs and terminals — Graph theory, real analysis and topology on one side of the desk, a heavily customized <span class="kw">Arch Linux</span> + <span class="kw">Hyprland</span> setup on the other.</p>
@@ -339,10 +300,8 @@
           <p class="line">My daily driver is <span class="kw">Neovim</span> (Native Package Manger Vim.Pack ) with <span class="kw">tinymist</span> for Typst, <span class="kw">Zathura</span> for bidirectionally-synced PDF preview, and <span class="kw">tmux</span> holding it all together.</p>
           <p class="line"><span class="cm">// currently reading Discrete math, Real Analysis and Point set Topology - July 2026.</span></p>
         </div>
-
         <h2>## interested in</h2>
         <p>Algebraic geometry, formal methods (Lean 4), symbolic computation, and the design of Mathematical tools.</p>
-
         <div style="margin-top:24px;">
           <button onclick="window.open(RESUME_URL,'_blank')" style="background:var(--green);border:none;color:var(--bg2);padding:6px 16px;font-family:inherit;font-weight:700;border-radius:4px;cursor:pointer;">
             📄 Download Resume (PDF)
@@ -355,11 +314,9 @@
         <span class="filename-tag">~/suroj-plalunga/stack.toml</span>
         <h1>stack.toml</h1>
         <p class="dim">the tools I actually reach for</p>
-
         <div class="toml-block">
           <div class="toml-section">[languages]</div>
           <div class="toml-row"><span class="toml-key">exploring</span><span class="toml-eq">=</span><span class="toml-val">["C++", "Julia", "Haskell"]</span></div>
-
           <div class="toml-section">[editor]</div>
           <div class="toml-row"><span class="toml-key">core</span><span class="toml-eq">=</span><span class="toml-val">"Neovim"</span></div>
           <div class="toml-row"><span class="toml-key">typst_lsp</span><span class="toml-eq">=</span><span class="toml-val">"tinymist"</span></div>
@@ -367,13 +324,11 @@
           <div class="toml-row"><span class="toml-key">snippets</span><span class="toml-eq">=</span><span class="toml-val">"LuaSnip"</span></div>
           <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"Telescope"</span></div> 
           <div class="toml-row"><span class="toml-key">Interactive Editor</span><span class="toml-eq">=</span><span class="toml-val">"Molten.nvim"</span></div> 
-
           <div class="toml-section">[system]</div>
           <div class="toml-row"><span class="toml-key">os</span><span class="toml-eq">=</span><span class="toml-val">"Arch Linux"</span></div>
           <div class="toml-row"><span class="toml-key">compositor</span><span class="toml-eq">=</span><span class="toml-val">"Hyprland"</span></div>
           <div class="toml-row"><span class="toml-key">portal</span><span class="toml-eq">=</span><span class="toml-val">"xdg-desktop-portal-hyprland"</span></div>
           <div class="toml-row"><span class="toml-key">multiplexer</span><span class="toml-eq">=</span><span class="toml-val">"tmux"</span></div>
-
           <div class="toml-section">[cli]</div>
           <div class="toml-row"><span class="toml-key">search</span><span class="toml-eq">=</span><span class="toml-val">["fzf", "ripgrep"]</span></div>
           <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"zoxide"</span></div>
@@ -399,10 +354,8 @@
       <section class="buffer" data-section="notes" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">loading...</span></span>
         <h1>notes & proofs</h1>
-        
         <h2>## compiled_pdfs</h2>
         <p class="dim" id="pdf-subtitle">Loading PDFs from manifest…</p>
-        
         <div class="zathura-viewer" id="zathura-viewer">
           <div class="zathura-bar">
             <span>[zathura] <span id="zathura-title" style="color:var(--cyan)"></span></span>
@@ -410,11 +363,9 @@
           </div>
           <iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen></iframe>
         </div>
-
         <div class="pdf-grid" id="pdf-list-container">
           <div class="loading-placeholder" id="loading-pdfs">⟳ loading PDFs…</div>
         </div>
-
         <h2>## raw_markdown</h2>
         <p class="dim">Markdown notes from your repositories — click to expand.</p>
         <div id="notes-list">
@@ -425,7 +376,7 @@
         </div>
       </section>
 
-      <!-- CONTACT (with form) -->
+      <!-- CONTACT -->
       <section class="buffer" data-section="contact" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
         <h1>contact</h1>
@@ -445,7 +396,6 @@
           <span class="prompt">$</span> echo $STATUS<br>
           <span class="dim">→ Beauty lies in the eyes of beholder.</span>
         </div>
-
         <h2>## send a message</h2>
         <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
           <input type="text" name="name" placeholder="Your name" required>
@@ -466,7 +416,6 @@
 
 <div class="toast" id="toast"></div>
 
-<!-- Floating help panel -->
 <div class="floating-panel" id="help-panel">
   <button class="close-btn" onclick="closeHelp()">✕</button>
   <h3>📖 Help</h3>
@@ -482,7 +431,6 @@
   </ul>
 </div>
 
-<!-- Floating search results -->
 <div class="floating-panel" id="search-panel">
   <button class="close-btn" onclick="closeSearch()">✕</button>
   <h3>🔍 Search Results</h3>
@@ -492,7 +440,20 @@
 <script>
 /* ---------------- Constants ---------------- */
 const GITHUB_USER = 'u9iver63';
-const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`; // adjust path as needed
+const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
+
+/* ---------------- Markdown & highlight.js configuration ---------------- */
+if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+  marked.setOptions({
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
+      }
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: true
+  });
+}
 
 /* ---------------- clock ---------------- */
 function tick() {
@@ -563,16 +524,14 @@ document.addEventListener('keydown', (e) => {
   if(cmdbar.classList.contains('show')) return; 
   if(document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
   if (e.key === ' ' || e.key === 'Spacebar') {
-    e.preventDefault();
-    leaderActive = true;
+    e.preventDefault(); leaderActive = true;
     clearTimeout(leaderTimeout);
     leaderTimeout = setTimeout(() => { leaderActive = false; }, 800);
     return;
   }
   if (leaderActive) {
     if (e.key.toLowerCase() === 'e') { e.preventDefault(); toggleSidebar(); }
-    leaderActive = false;
-    return; 
+    leaderActive = false; return; 
   }
   if(e.key === 'j'){ e.preventDefault(); currentIndex = Math.min(currentIndex+1, treeItems.length-1); goTo(treeItems[currentIndex].dataset.section); }
   else if(e.key === 'k'){ e.preventDefault(); currentIndex = Math.max(currentIndex-1, 0); goTo(treeItems[currentIndex].dataset.section); }
@@ -584,15 +543,8 @@ document.addEventListener('keydown', (e) => {
 const cmdbar = document.getElementById('cmdbar');
 const cmdInput = document.getElementById('cmd-input');
 
-function openCmd(){
-  cmdbar.classList.add('show');
-  cmdInput.value = '';
-  cmdInput.focus();
-}
-function closeCmd(){
-  cmdbar.classList.remove('show');
-  cmdInput.blur();
-}
+function openCmd(){ cmdbar.classList.add('show'); cmdInput.value = ''; cmdInput.focus(); }
+function closeCmd(){ cmdbar.classList.remove('show'); cmdInput.blur(); }
 cmdInput.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){ closeCmd(); }
   if(e.key === 'Enter'){
@@ -607,25 +559,20 @@ cmdInput.addEventListener('keydown', (e) => {
     else { showToast('E492: not an editor command: ' + cmd); closeCmd(); }
   }
 });
-document.addEventListener('click', (e) => {
-  if(cmdbar.classList.contains('show') && !cmdbar.contains(e.target)) closeCmd();
-});
+document.addEventListener('click', (e) => { if(cmdbar.classList.contains('show') && !cmdbar.contains(e.target)) closeCmd(); });
 
 /* ---------------- toast ---------------- */
 let toastTimer;
 function showToast(msg){
   const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
+  toast.textContent = msg; toast.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
 }
 
 /* ---------------- copy button ---------------- */
 document.querySelectorAll('.copy-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    const text = btn.dataset.copy;
-    navigator.clipboard?.writeText(text).then(()=> showToast('copied!')).catch(()=> showToast(text));
+    navigator.clipboard?.writeText(btn.dataset.copy).then(()=> showToast('copied!')).catch(()=> showToast(btn.dataset.copy));
   });
 });
 
@@ -641,23 +588,15 @@ function openPdf(url, title) {
   showToast(`Opened ${title}`);
 }
 function closePdf() {
-  if(pdfViewer.classList.contains('active')) {
-    pdfViewer.classList.remove('active');
-    pdfFrame.src = "";
-    showToast('Closed Zathura');
-  }
+  if(pdfViewer.classList.contains('active')) { pdfViewer.classList.remove('active'); pdfFrame.src = ""; showToast('Closed Zathura'); }
 }
 
 /* ---------------- HELP PANEL ---------------- */
 const helpPanel = document.getElementById('help-panel');
 function openHelp() { helpPanel.classList.add('show'); }
 function closeHelp() { helpPanel.classList.remove('show'); }
-document.addEventListener('click', (e) => {
-  if (helpPanel.classList.contains('show') && !helpPanel.contains(e.target)) closeHelp();
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && helpPanel.classList.contains('show')) closeHelp();
-});
+document.addEventListener('click', (e) => { if (helpPanel.classList.contains('show') && !helpPanel.contains(e.target)) closeHelp(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && helpPanel.classList.contains('show')) closeHelp(); });
 
 /* ---------------- SEARCH (GREP) ---------------- */
 let searchIndex = [];
@@ -667,13 +606,10 @@ const searchResultsDiv = document.getElementById('search-results');
 function buildSearchIndex(repos) {
   searchIndex = [];
   repos.forEach(repo => {
-    // repo name & description
     searchIndex.push({ text: `${repo.name} ${repo.description||''}`, type: 'repo', name: repo.name, link: repo.html_url });
-    // PDF files
     (repo.pdfs||[]).forEach(pdf => {
       searchIndex.push({ text: pdf.path, type: 'pdf', name: pdf.path, repo: repo.name, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${repo.defaultBranch||'main'}/${pdf.path}` });
     });
-    // Markdown files
     (repo.mds||[]).forEach(md => {
       searchIndex.push({ text: md.path, type: 'md', name: md.path, repo: repo.name, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${repo.defaultBranch||'main'}/${md.path}` });
     });
@@ -693,10 +629,8 @@ function performSearch(query) {
       div.innerHTML = `<span class="type">[${item.type}]</span> <strong>${item.name}</strong> <span class="dim">${item.repo ? 'in '+item.repo : ''}</span>`;
       div.addEventListener('click', () => {
         if (item.type === 'pdf') openPdf(item.url, item.name);
-        else if (item.type === 'md') {
-          // navigate to notes and expand? For simplicity, just alert or open raw
-          window.open(item.url, '_blank');
-        } else if (item.link) window.open(item.link, '_blank');
+        else if (item.type === 'md') window.open(item.url, '_blank');
+        else if (item.link) window.open(item.link, '_blank');
         closeSearch();
       });
       searchResultsDiv.appendChild(div);
@@ -704,50 +638,9 @@ function performSearch(query) {
   }
   searchPanel.classList.add('show');
 }
-
 function closeSearch() { searchPanel.classList.remove('show'); }
-document.addEventListener('click', (e) => {
-  if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch();
-});
-document.addEventListener('keydown', (e) => {
-  if (e.key === 'Escape' && searchPanel.classList.contains('show')) closeSearch();
-});
-
-/* ---------------- MARKDOWN SYNTAX HIGHLIGHTING ---------------- */
-function highlightCodeBlocks(container) {
-  // Find fenced code blocks (```) and wrap them for highlight.js
-  const text = container.textContent;
-  const lines = text.split('\n');
-  let inCode = false, lang = '', code = [];
-  const newHtml = [];
-  for (let line of lines) {
-    if (line.startsWith('```') && !inCode) {
-      inCode = true;
-      lang = line.slice(3).trim();
-      code = [];
-    } else if (line.startsWith('```') && inCode) {
-      inCode = false;
-      const pre = document.createElement('pre');
-      const codeEl = document.createElement('code');
-      if (lang) codeEl.className = `language-${lang}`;
-      codeEl.textContent = code.join('\n');
-      pre.appendChild(codeEl);
-      newHtml.push(pre.outerHTML);
-    } else if (inCode) {
-      code.push(line);
-    } else {
-      newHtml.push(`<span>${escapeHtml(line)}</span>`);
-    }
-  }
-  container.innerHTML = newHtml.join('\n');
-  container.querySelectorAll('pre code').forEach(block => {
-    hljs.highlightElement(block);
-  });
-}
-
-function escapeHtml(text) {
-  return text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
+document.addEventListener('click', (e) => { if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && searchPanel.classList.contains('show')) closeSearch(); });
 
 /* ---------------- STATIC MANIFEST LOADER ---------------- */
 async function loadContent() {
@@ -775,10 +668,8 @@ async function loadContent() {
     const repos = await res.json();
     if (repos.length === 0) throw new Error('No repos found in manifest');
 
-    // Build search index
     buildSearchIndex(repos);
 
-    // Projects
     projLoading.remove();
     const displayedRepos = repos.slice(0, 12);
     repoCount.textContent = displayedRepos.length + ' repos';
@@ -791,16 +682,10 @@ async function loadContent() {
       const desc = repo.description || 'No description provided.';
       const starBadge = repo.stargazers_count > 0 ? `<span>⭐ ${repo.stargazers_count}</span>` : '';
       const forkBadge = repo.forks_count > 0 ? `<span>🍴 ${repo.forks_count}</span>` : '';
-      card.innerHTML = `
-        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="repo-link">
-          <div class="proj-head"><h3>${repo.name}</h3><span class="status">${new Date(repo.pushed_at || repo.pushedAt).toLocaleDateString()}</span></div>
-          <p>${desc}</p>
-          <div class="meta-badges">${langTag}${starBadge}${forkBadge}</div>
-        </a>`;
+      card.innerHTML = `<a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="repo-link"><div class="proj-head"><h3>${repo.name}</h3><span class="status">${new Date(repo.pushed_at || repo.pushedAt).toLocaleDateString()}</span></div><p>${desc}</p><div class="meta-badges">${langTag}${starBadge}${forkBadge}</div></a>`;
       projGrid.appendChild(card);
     });
 
-    // PDFs & MDs
     let allPdfs = [], allMds = [];
     repos.forEach(repo => {
       const branch = repo.defaultBranch || 'main';
@@ -832,13 +717,7 @@ async function loadContent() {
       allMds.forEach(md => {
         const noteDiv = document.createElement('div');
         noteDiv.className = 'note-item';
-        noteDiv.innerHTML = `
-          <button class="note-head">
-            <span>${md.name}</span>
-            <span class="date">${md.repo}</span>
-            <span class="arrow">›</span>
-          </button>
-          <div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
+        noteDiv.innerHTML = `<button class="note-head"><span>${md.name}</span><span class="date">${md.repo}</span><span class="arrow">›</span></button><div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
         mdContainer.appendChild(noteDiv);
         const headBtn = noteDiv.querySelector('.note-head');
         const bodyInner = noteDiv.querySelector('.note-body-inner');
@@ -849,11 +728,8 @@ async function loadContent() {
               const res = await fetch(md.url);
               if (!res.ok) throw new Error('Failed to fetch');
               const rawText = await res.text();
-              bodyInner.textContent = rawText;
-              // Apply syntax highlighting to code blocks
-              if (typeof hljs !== 'undefined') {
-                highlightCodeBlocks(bodyInner);
-              }
+              // Use marked to parse Markdown → HTML
+              bodyInner.innerHTML = marked.parse(rawText);
             } catch (err) {
               bodyInner.textContent = 'Error loading content.';
             }
@@ -872,16 +748,8 @@ async function loadContent() {
   }
 }
 
-function getLanguageColor(lang) {
-  const colors = { 'JavaScript':'#f1e05a','Python':'#3572A5','TypeScript':'#3178c6','Rust':'#dea584','C++':'#f34b7d','Haskell':'#5e5086','Julia':'#a270ba','Typst':'#239DAD','Lean':'#17980E','Shell':'#89e051','Jupyter Notebook':'#DA5B0B' };
-  return colors[lang] || 'var(--blue)';
-}
-function formatSize(bytes) {
-  if (!bytes) return 'unknown';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB';
-  return (bytes/1048576).toFixed(1) + ' MB';
-}
+function getLanguageColor(lang) { const colors = { 'JavaScript':'#f1e05a','Python':'#3572A5','TypeScript':'#3178c6','Rust':'#dea584','C++':'#f34b7d','Haskell':'#5e5086','Julia':'#a270ba','Typst':'#239DAD','Lean':'#17980E','Shell':'#89e051','Jupyter Notebook':'#DA5B0B' }; return colors[lang] || 'var(--blue)'; }
+function formatSize(bytes) { if (!bytes) return 'unknown'; if (bytes < 1024) return bytes + ' B'; if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/1048576).toFixed(1) + ' MB'; }
 
 loadContent();
 </script>
