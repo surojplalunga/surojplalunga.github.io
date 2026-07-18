@@ -320,7 +320,7 @@
         <h2>## interested in</h2>
         <p>Algebraic geometry, formal methods (Lean 4), symbolic computation, and the design of Mathematical tools.</p>
         <div style="margin-top:24px;">
-          <button onclick="window.open(RESUME_URL,'_blank')" style="background:var(--green);border:none;color:var(--bg2);padding:6px 16px;font-family:inherit;font-weight:700;border-radius:4px;cursor:pointer;transition: opacity .15s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
+          <button onclick="window.open(window.RESUME_URL,'_blank')" style="background:var(--green);border:none;color:var(--bg2);padding:6px 16px;font-family:inherit;font-weight:700;border-radius:4px;cursor:pointer;transition: opacity .15s;" onmouseover="this.style.opacity='0.9'" onmouseout="this.style.opacity='1'">
             📄 Download Resume (PDF)
           </button>
         </div>
@@ -472,18 +472,24 @@ const GITHUB_USER = 'u9iver63';
 const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
 const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`;
 
+// Make RESUME_URL globally accessible for the inline onclick button
+window.RESUME_URL = RESUME_URL;
+
 /* ---------------- Markdown & highlight.js & KaTeX config ---------------- */
-if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
-  marked.setOptions({
-    highlight: function(code, lang) {
-      if (lang && hljs.getLanguage(lang)) {
-        try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
-      }
-      return hljs.highlightAuto(code).value;
-    },
-    breaks: true
-  });
-}
+// Wait for all deferred scripts to load before configuring marked
+window.addEventListener('DOMContentLoaded', function () {
+  if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+    marked.setOptions({
+      highlight: function(code, lang) {
+        if (lang && hljs.getLanguage(lang)) {
+          try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
+        }
+        return hljs.highlightAuto(code).value;
+      },
+      breaks: true
+    });
+  }
+});
 
 function renderMarkdown(rawText, targetElement) {
   if (typeof marked === 'undefined') {
@@ -491,6 +497,8 @@ function renderMarkdown(rawText, targetElement) {
     return;
   }
   targetElement.innerHTML = marked.parse(rawText);
+
+  // KaTeX
   if (typeof renderMathInElement !== 'undefined') {
     try {
       renderMathInElement(targetElement, {
@@ -501,6 +509,13 @@ function renderMarkdown(rawText, targetElement) {
         throwOnError: false
       });
     } catch(e) {}
+  }
+
+  // Re-apply highlight.js to any code blocks that may have been added after Markdown parsing
+  if (typeof hljs !== 'undefined') {
+    targetElement.querySelectorAll('pre code').forEach(block => {
+      hljs.highlightElement(block);
+    });
   }
 }
 
@@ -738,7 +753,6 @@ async function loadNow() {
     div.style.padding = '0';
     renderMarkdown(rawText, div);
     container.appendChild(div);
-    // optional: show last commit date from ETag cache (not implemented to avoid rate limit)
     updatedSpan.textContent = '';
   } catch (e) {
     container.innerHTML = '<p class="dim">Could not load now.md.</p>';
