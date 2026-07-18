@@ -3,20 +3,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<title>manifest.json generator</title>
+<title>manifest.json generator (with error handling)</title>
 <style>
   body { background:#1A1B26; color:#C0CAF5; font-family:sans-serif; max-width:500px; margin:40px auto; }
   input, button { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
   button { background:#7AA2F7; border:none; color:#1A1B26; font-weight:bold; cursor:pointer; }
-  #status { margin-top:10px; color:#9ECE6A; }
+  #status { margin-top:10px; color:#9ECE6A; white-space:pre-wrap; }
+  .error { color: var(--red); }
 </style>
 </head>
 <body>
 <h2>Generate manifest.json</h2>
-<label>GitHub username</label>
-<input id="username" placeholder="u9iver63" />
+<label>GitHub username (the one with the repos, e.g. u9iver63)</label>
+<input id="username" placeholder="u9iver63" value="u9iver63" />
 <label>Personal access token (needs <code>public_repo</code> scope)</label>
-<input id="token" type="password" placeholder="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" />
+<input id="token" type="password" placeholder="ghp_..." />
 <button onclick="generate()">Generate & Download</button>
 <div id="status"></div>
 <script>
@@ -24,7 +25,12 @@ async function generate() {
   const username = document.getElementById('username').value.trim();
   const token = document.getElementById('token').value.trim();
   const status = document.getElementById('status');
-  if (!username || !token) { status.textContent = 'Please fill both fields.'; return; }
+  status.textContent = '';
+
+  if (!username || !token) {
+    status.textContent = '❌ Please fill both fields.';
+    return;
+  }
 
   status.textContent = 'Fetching repositories…';
   const headers = { Authorization: `token ${token}`, Accept: 'application/vnd.github.v3+json' };
@@ -32,10 +38,22 @@ async function generate() {
   try {
     // 1. Get all non-fork repos
     const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`, { headers });
+    if (!reposRes.ok) {
+      if (reposRes.status === 401) throw new Error('Invalid token or token lacks permissions.');
+      if (reposRes.status === 404) throw new Error('Username not found.');
+      throw new Error(`GitHub API error: ${reposRes.status} ${reposRes.statusText}`);
+    }
     const repos = await reposRes.json();
+    if (!Array.isArray(repos)) {
+      throw new Error('Unexpected response – not an array. Check your token and username.');
+    }
     const ownRepos = repos.filter(r => !r.fork);
+    if (ownRepos.length === 0) {
+      status.textContent = '⚠️ No non‑fork repositories found. Nothing to generate.';
+      return;
+    }
 
-    status.textContent = `Found ${ownRepos.length} repos. Scanning files…`;
+    status.textContent = `Found ${ownRepos.length} repos. Scanning files (this may take a moment)…`;
     const result = [];
 
     for (const repo of ownRepos) {
@@ -45,6 +63,7 @@ async function generate() {
           `https://api.github.com/repos/${username}/${repo.name}/git/trees/${branch}?recursive=1`,
           { headers }
         );
+        if (!treeRes.ok) throw new Error('Tree fetch failed');
         const treeData = await treeRes.json();
         const tree = treeData.tree || [];
         const pdfs = tree
@@ -68,9 +87,9 @@ async function generate() {
     a.download = 'manifest.json';
     a.click();
     URL.revokeObjectURL(url);
-    status.textContent = 'manifest.json downloaded! Place it next to your index.html.';
+    status.textContent = '✅ manifest.json downloaded! Place it in your repository.';
   } catch (e) {
-    status.textContent = 'Error: ' + e.message;
+    status.textContent = '❌ Error: ' + e.message;
   }
 }
 </script>
