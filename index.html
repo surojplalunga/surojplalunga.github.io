@@ -23,16 +23,26 @@
   "familyName": "Plalunga",
   "description": "BSc Mathematics student at Tribhuvan University, Nepal. Enthusiast in algebraic geometry, formal methods, and developer tooling. Neovim, Arch Linux, Hyprland user.",
   "url": "https://surojplalunga.github.io",
-  "sameAs": [
-    "https://github.com/surojplalunga"
-  ],
-  "knowsAbout": ["Mathematics", "Algebraic Geometry", "Formal Methods", "Lean 4", "Typst", "Arch Linux", "Neovim", "C++", "Haskell", "Mathematical Physics"],
-  "alumniOf": {
-    "@type": "CollegeOrUniversity",
-    "name": "Amrit Science Campus, Tribhuvan University"
-  }
+  "sameAs": ["https://github.com/surojplalunga"],
+  "knowsAbout": ["Mathematics","Algebraic Geometry","Formal Methods","Lean 4","Typst","Arch Linux","Neovim","C++","Haskell","Mathematical Physics"],
+  "alumniOf": { "@type": "CollegeOrUniversity", "name": "Amrit Science Campus, Tribhuvan University" }
 }
 </script>
+
+<!-- Libraries: highlight.js, marked, KaTeX -->
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/haskell.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/lean.min.js"></script>
+
+<script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.0/marked.min.js"></script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
 
 <style>
   :root {
@@ -86,8 +96,6 @@
   .statusline .clock { color: var(--text-dim); }
 
   .workspace { flex: 1; display: flex; min-height: 0; position: relative; }
-
-  /* Sidebar */
   .sidebar { width: 238px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--line); padding: 18px 0; overflow-y: auto; transition: transform 0.25s ease; z-index: 50; }
   .sidebar.collapsed { display: none; }
   .sidebar .path { padding: 0 18px 12px; font-size: 0.72rem; color: var(--text-dimmer); }
@@ -98,10 +106,8 @@
   .sidebar-hint { margin-top: 20px; padding: 12px 18px; border-top: 1px solid var(--line); font-size: 0.68rem; color: var(--text-dimmer); line-height: 1.9; }
   .sidebar-hint kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--text-dim); }
 
-  /* Backdrop for mobile */
   .sidebar-backdrop { display: none; position: fixed; top: 0; left: 0; right: 0; bottom: 0; background: rgba(0,0,0,0.5); z-index: 49; }
 
-  /* Main */
   .main { flex: 1; display: flex; flex-direction: column; overflow: hidden; }
   .bufferline { display: flex; align-items: center; background: var(--bg2); border-bottom: 1px solid var(--line); overflow-x: auto; -webkit-overflow-scrolling: touch; }
   .buffer-tab { padding: 6px 14px; border-right: 1px solid var(--line); color: var(--text-dimmer); cursor: pointer; white-space: nowrap; transition: background .12s, color .12s; font-size: 0.78rem; flex-shrink: 0; }
@@ -150,8 +156,9 @@
   .note-item.open .arrow { transform: rotate(90deg); }
   .note-head .date { color: var(--text-dimmer); font-size: 0.76rem; margin-right: auto; margin-left: 14px; }
   .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
-  .note-item.open .note-body { max-height: 300px; overflow-y: auto; }
-  .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
+  .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
+  .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
+  .note-body-inner img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
 
   .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
   .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -183,65 +190,57 @@
   .toast { position: fixed; bottom: 52px; right: 20px; background: var(--panel); border: 1px solid var(--line); padding: 9px 16px; border-radius: 4px; font-size: 0.8rem; color: var(--text); opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 99; }
   .toast.show { opacity: 1; transform: translateY(0); }
 
-  /* ==================== MOBILE RESPONSIVE ==================== */
+  .floating-panel {
+    position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
+    background: var(--bg2); border: 2px solid var(--blue); border-radius: 6px;
+    padding: 20px 24px; z-index: 200; display: none;
+    width: 500px; max-width: 90vw; max-height: 80vh; overflow-y: auto;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.8);
+    font-size: 0.85rem; color: var(--text);
+  }
+  .floating-panel.show { display: block; }
+  .floating-panel h3 { margin-top: 0; color: var(--blue); }
+  .floating-panel ul { list-style: none; padding: 0; margin: 0; }
+  .floating-panel li { margin-bottom: 6px; }
+  .floating-panel .key { color: var(--magenta); }
+  .floating-panel .close-btn {
+    position: absolute; top: 8px; right: 12px;
+    background: none; border: none; color: var(--red); cursor: pointer; font-size: 1.2rem;
+  }
+
+  .search-item { padding: 6px 0; border-bottom: 1px solid var(--line); cursor: pointer; }
+  .search-item:hover { color: var(--blue); }
+  .search-item .type { color: var(--text-dimmer); font-size: 0.7rem; }
+
+  .contact-form input, .contact-form textarea {
+    width: 100%; background: var(--bg); border: 1px solid var(--line);
+    color: var(--text); font-family: inherit; font-size: 0.9rem;
+    padding: 8px; margin: 5px 0 12px; border-radius: 4px;
+  }
+  .contact-form button[type="submit"] {
+    background: var(--blue); border: none; color: var(--bg2);
+    padding: 8px 16px; cursor: pointer; font-weight: 700;
+  }
+
   @media (max-width: 768px) {
     .statusline { font-size: 0.68rem; gap: 8px; padding: 0 8px; }
     .statusline .clock { display: none; }
-    .statusline .spacer { flex: 0; }
     .mode-pill { padding: 2px 6px; font-size: 0.65rem; }
-
-    .sidebar {
-      position: fixed;
-      top: 34px;
-      left: 0;
-      bottom: 0;
-      width: 260px;
-      transform: translateX(-100%);
-      z-index: 100;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.5);
-    }
+    .sidebar { position: fixed; top: 34px; left: 0; bottom: 0; width: 260px; transform: translateX(-100%); z-index: 100; box-shadow: 2px 0 10px rgba(0,0,0,0.5); }
     .sidebar.open { transform: translateX(0); }
     .sidebar-backdrop.visible { display: block; }
-
-    .bufferline { overflow-x: auto; }
-    .buffer-tab { padding: 6px 10px; font-size: 0.7rem; }
-
-    .main-content { width: 100%; }
-    .buffer {
-      padding: 24px 20px 80px;
-      max-width: 100%;
-    }
+    .buffer { padding: 24px 20px 80px; max-width: 100%; }
     .buffer h1 { font-size: 2rem; }
-    .buffer h2 { font-size: 0.85rem; }
-
     .lines { border-left: none; margin-left: 0; }
     .line { padding-left: 0; }
     .line::before { display: none; }
-
     .toml-row { flex-direction: column; gap: 4px; }
     .toml-key { width: auto; }
-
     .proj-grid { grid-template-columns: 1fr; }
-
-    .pdf-item { font-size: 0.78rem; flex-wrap: wrap; }
-    .pdf-item .size { margin-left: auto; }
-
     .zathura-viewer { height: 400px; }
-
-    .contact-row { flex-wrap: wrap; }
-    .contact-row .k { width: 60px; }
-
-    .cmdbar input { font-size: 0.8rem; }
     .cmdbar .cmd-hint { display: none; }
     .toast { bottom: 60px; right: 10px; max-width: calc(100% - 20px); }
-  }
-
-  @media (max-width: 480px) {
-    .buffer { padding: 16px 14px 80px; }
-    .buffer h1 { font-size: 1.8rem; }
-    .buffer p, .line { font-size: 0.8rem; }
-    .zathura-viewer { height: 300px; }
-    .pdf-item { padding: 10px 12px; }
+    .floating-panel { width: 90vw; max-height: 70vh; }
   }
 </style>
 </head>
@@ -263,7 +262,6 @@
 
 <div class="workspace">
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-
   <aside class="sidebar" id="sidebar">
     <div class="path">~/suroj-plalunga</div>
     <button class="tree-item active" data-section="about" data-mode="NORMAL" data-color="#7AA2F7" role="tab" aria-selected="true">
@@ -278,12 +276,15 @@
     <button class="tree-item" data-section="notes" data-mode="VISUAL" data-color="#BB9AF7" role="tab" aria-selected="false">
       <span class="icon">▾</span> notes/
     </button>
+    <button class="tree-item" data-section="now" data-mode="INSERT" data-color="#7DCFFF" role="tab" aria-selected="false">
+      <span class="icon">▸</span> now.md
+    </button>
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false">
       <span class="icon">▸</span> contact.txt
     </button>
 
     <div class="sidebar-hint">
-      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>5</kbd> navigate</div>
+      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>6</kbd> navigate</div>
       <div><kbd>SPC</kbd> <kbd>e</kbd> toggle explorer</div>
       <div><kbd>:</kbd> command mode</div>
     </div>
@@ -297,17 +298,20 @@
         <span class="filename-tag">~/suroj-plalunga/about.md — 1 buffer</span>
         <h1>Suroj Plalunga</h1>
         <p class="dim">BSc Mathematics · Tribhuvan University, Nepal</p>
-
-        <h2>$whoami</h2>
         <p>My name is <strong>Suroj Plalunga</strong>. I am a BSc Mathematics student at Tribhuvan University, Nepal.</p>
         <div class="lines">
           <p class="line">I split my time between proofs and terminals — Graph theory, real analysis and topology on one side of the desk, a heavily customized <span class="kw">Arch Linux</span> + <span class="kw">Hyprland</span> setup on the other.</p>
+          <p class="line"></p>
           <p class="line">My daily driver is <span class="kw">Neovim</span> (Native Package Manger Vim.Pack ) with <span class="kw">tinymist</span> for Typst, <span class="kw">Zathura</span> for bidirectionally-synced PDF preview, and <span class="kw">tmux</span> holding it all together.</p>
           <p class="line"><span class="cm">// currently reading Discrete math, Real Analysis and Point set Topology - July 2026.</span></p>
         </div>
-
         <h2>## interested in</h2>
         <p>Algebraic geometry, formal methods (Lean 4), symbolic computation, and the design of Mathematical tools.</p>
+        <div style="margin-top:24px;">
+          <button onclick="window.open(RESUME_URL,'_blank')" style="background:var(--green);border:none;color:var(--bg2);padding:6px 16px;font-family:inherit;font-weight:700;border-radius:4px;cursor:pointer;">
+            📄 Download Resume (PDF)
+          </button>
+        </div>
       </section>
 
       <!-- STACK -->
@@ -315,11 +319,9 @@
         <span class="filename-tag">~/suroj-plalunga/stack.toml</span>
         <h1>stack.toml</h1>
         <p class="dim">the tools I actually reach for</p>
-
         <div class="toml-block">
           <div class="toml-section">[languages]</div>
           <div class="toml-row"><span class="toml-key">exploring</span><span class="toml-eq">=</span><span class="toml-val">["C++", "Julia", "Haskell"]</span></div>
-
           <div class="toml-section">[editor]</div>
           <div class="toml-row"><span class="toml-key">core</span><span class="toml-eq">=</span><span class="toml-val">"Neovim"</span></div>
           <div class="toml-row"><span class="toml-key">typst_lsp</span><span class="toml-eq">=</span><span class="toml-val">"tinymist"</span></div>
@@ -327,13 +329,11 @@
           <div class="toml-row"><span class="toml-key">snippets</span><span class="toml-eq">=</span><span class="toml-val">"LuaSnip"</span></div>
           <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"Telescope"</span></div> 
           <div class="toml-row"><span class="toml-key">Interactive Editor</span><span class="toml-eq">=</span><span class="toml-val">"Molten.nvim"</span></div> 
-
           <div class="toml-section">[system]</div>
           <div class="toml-row"><span class="toml-key">os</span><span class="toml-eq">=</span><span class="toml-val">"Arch Linux"</span></div>
           <div class="toml-row"><span class="toml-key">compositor</span><span class="toml-eq">=</span><span class="toml-val">"Hyprland"</span></div>
           <div class="toml-row"><span class="toml-key">portal</span><span class="toml-eq">=</span><span class="toml-val">"xdg-desktop-portal-hyprland"</span></div>
           <div class="toml-row"><span class="toml-key">multiplexer</span><span class="toml-eq">=</span><span class="toml-val">"tmux"</span></div>
-
           <div class="toml-section">[cli]</div>
           <div class="toml-row"><span class="toml-key">search</span><span class="toml-eq">=</span><span class="toml-val">["fzf", "ripgrep"]</span></div>
           <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"zoxide"</span></div>
@@ -352,18 +352,15 @@
         </div>
         <div id="retry-projects" style="display:none; margin-top:10px;">
           <button onclick="loadContent()" style="background:var(--panel);border:1px solid var(--line);color:var(--blue);padding:6px 12px;">Retry</button>
-          <span class="dim" style="margin-left:10px;">Could not load data.</span>
         </div>
       </section>
 
-      <!-- NOTES -->
+      <!-- NOTES & PDFs -->
       <section class="buffer" data-section="notes" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">loading...</span></span>
         <h1>notes & proofs</h1>
-        
         <h2>## compiled_pdfs</h2>
         <p class="dim" id="pdf-subtitle">Loading PDFs from manifest…</p>
-        
         <div class="zathura-viewer" id="zathura-viewer">
           <div class="zathura-bar">
             <span>[zathura] <span id="zathura-title" style="color:var(--cyan)"></span></span>
@@ -371,11 +368,9 @@
           </div>
           <iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen></iframe>
         </div>
-
         <div class="pdf-grid" id="pdf-list-container">
           <div class="loading-placeholder" id="loading-pdfs">⟳ loading PDFs…</div>
         </div>
-
         <h2>## raw_markdown</h2>
         <p class="dim">Markdown notes from your repositories — click to expand.</p>
         <div id="notes-list">
@@ -386,17 +381,22 @@
         </div>
       </section>
 
+      <!-- NOW (blog) -->
+      <section class="buffer" data-section="now" role="tabpanel">
+        <span class="filename-tag">~/suroj-plalunga/now.md</span>
+        <h1>now</h1>
+        <p class="dim">What I’m up to — updated whenever.</p>
+        <div class="lines" id="now-content">
+          <p class="loading-placeholder">⟳ loading now.md…</p>
+        </div>
+      </section>
+
       <!-- CONTACT -->
       <section class="buffer" data-section="contact" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
         <h1>contact</h1>
         <p class="dim">reach out if you want to collaborate</p>
         <div class="contact-block">
-          <div class="contact-row">
-            <span class="k">email</span>
-            <span class="v" id="email-val">lsuroj61@gmail.com</span>
-            <button class="copy-btn" data-copy="lsuroj61@gmail.com">copy</button>
-          </div>
           <div class="contact-row">
             <span class="k">github</span>
             <span class="v"><a href="https://github.com/surojplalunga" target="_blank" rel="noopener noreferrer">github.com/surojplalunga</a></span>
@@ -406,11 +406,18 @@
             <span class="k">location</span>
             <span class="v">Kathmandu, Nepal</span>
           </div>
-          <div class="status-echo">
-            <span class="prompt">$</span> echo $STATUS<br>
-            <span class="dim">→ Beauty lies in the eyes of beholder.</span>
-          </div>
         </div>
+        <div class="status-echo" style="margin-bottom:24px;">
+          <span class="prompt">$</span> echo $STATUS<br>
+          <span class="dim">→ Beauty lies in the eyes of beholder.</span>
+        </div>
+        <h2>## send a message</h2>
+        <form class="contact-form" action="https://formspree.io/f/xojgdnpp" method="POST">
+          <input type="text" name="name" placeholder="Your name" required>
+          <input type="email" name="email" placeholder="Your email" required>
+          <textarea name="message" rows="5" placeholder="Your message..."></textarea>
+          <button type="submit">:wq (send)</button>
+        </form>
       </section>
     </div>
   </main>
@@ -418,13 +425,72 @@
 
 <div class="cmdbar" id="cmdbar" role="dialog" aria-label="command input">
   <span class="colon">:</span>
-  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · contact · help" aria-label="command">
+  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · contact · help" aria-label="command">
   <span class="cmd-hint">enter to run · esc to cancel</span>
 </div>
 
 <div class="toast" id="toast"></div>
 
+<div class="floating-panel" id="help-panel">
+  <button class="close-btn" onclick="closeHelp()">✕</button>
+  <h3>📖 Help</h3>
+  <ul>
+    <li><span class="key">j</span> / <span class="key">k</span> – navigate sections</li>
+    <li><span class="key">1</span>–<span class="key">6</span> – jump to section</li>
+    <li><span class="key">SPC</span> <span class="key">e</span> – toggle file tree</li>
+    <li><span class="key">:</span> – open command bar</li>
+    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:contact</span></li>
+    <li><span class="key">:help</span> – this window</li>
+    <li><span class="key">:grep &lt;query&gt;</span> – search across projects, PDFs, notes</li>
+    <li><span class="key">:q</span> / <span class="key">:wq</span> – you know what happens :)</li>
+  </ul>
+</div>
+
+<div class="floating-panel" id="search-panel">
+  <button class="close-btn" onclick="closeSearch()">✕</button>
+  <h3>🔍 Search Results</h3>
+  <div id="search-results"></div>
+</div>
+
 <script>
+/* ---------------- Constants (change these) ---------------- */
+const GITHUB_USER = 'u9iver63';
+const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`; // adjust path
+const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`; // your "now" blog file
+
+/* ---------------- Markdown, highlight.js, KaTeX config ---------------- */
+if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
+  marked.setOptions({
+    highlight: function(code, lang) {
+      if (lang && hljs.getLanguage(lang)) {
+        try { return hljs.highlight(code, { language: lang }).value; } catch(e) {}
+      }
+      return hljs.highlightAuto(code).value;
+    },
+    breaks: true
+  });
+}
+
+function renderMarkdown(rawText, targetElement) {
+  if (typeof marked === 'undefined') {
+    targetElement.textContent = rawText;
+    return;
+  }
+  targetElement.innerHTML = marked.parse(rawText);
+  // KaTeX
+  if (typeof renderMathInElement !== 'undefined') {
+    try {
+      renderMathInElement(targetElement, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    } catch(e) {}
+  }
+}
+
 /* ---------------- clock ---------------- */
 function tick() {
   const d = new Date();
@@ -432,47 +498,27 @@ function tick() {
 }
 tick(); setInterval(tick, 60000);
 
-/* ---------------- toggle sidebar (mobile overlay) ---------------- */
+/* ---------------- toggle sidebar ---------------- */
 const sidebar = document.getElementById('sidebar');
 const backdrop = document.getElementById('sidebar-backdrop');
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 
-function openSidebar() {
-  sidebar.classList.add('open');
-  backdrop.classList.add('visible');
-}
-function closeSidebar() {
-  sidebar.classList.remove('open');
-  backdrop.classList.remove('visible');
-}
+function openSidebar() { sidebar.classList.add('open'); backdrop.classList.add('visible'); }
+function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('visible'); }
 function toggleSidebar() {
-  if (sidebar.classList.contains('open')) {
-    closeSidebar();
-    showToast('Neo-tree closed');
-  } else {
-    openSidebar();
-    showToast('Neo-tree opened');
-  }
+  if (sidebar.classList.contains('open')) { closeSidebar(); showToast('Neo-tree closed'); }
+  else { openSidebar(); showToast('Neo-tree opened'); }
 }
 btnToggleSidebar.addEventListener('click', toggleSidebar);
 backdrop.addEventListener('click', closeSidebar);
 
-// Close sidebar when selecting a section on mobile
-const originalGoTo = goTo;
-window.goTo = function(section) {
-  originalGoTo(section);
-  if (window.innerWidth <= 768) {
-    closeSidebar();
-  }
-};
-
-/* ---------------- bufferline ---------------- */
+/* ---------------- bufferline & navigation (6 items) ---------------- */
 const treeItems = Array.from(document.querySelectorAll('.tree-item'));
 const buffers = Array.from(document.querySelectorAll('.buffer'));
 const modePill = document.getElementById('mode-pill');
 const statusFile = document.getElementById('status-file');
 const bufferline = document.getElementById('bufferline');
-const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', contact:'contact.txt' };
+const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', now:'now.md', contact:'contact.txt' };
 let currentIndex = 0;
 
 function renderBufferline() {
@@ -491,9 +537,7 @@ function renderBufferline() {
 function goTo(section) {
   const item = treeItems.find(t => t.dataset.section === section);
   if(!item) return;
-
   if(section !== 'notes') closePdf();
-
   treeItems.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
   buffers.forEach(b => b.classList.remove('active'));
   item.classList.add('active');
@@ -504,41 +548,30 @@ function goTo(section) {
   statusFile.textContent = fileNames[section];
   currentIndex = treeItems.indexOf(item);
   renderBufferline();
+  if (window.innerWidth <= 768) closeSidebar();
 }
 
-treeItems.forEach(item => {
-  item.addEventListener('click', () => goTo(item.dataset.section));
-});
+treeItems.forEach(item => item.addEventListener('click', () => goTo(item.dataset.section)));
 renderBufferline();
 
 /* ---------------- keyboard nav & leader ---------------- */
-let leaderActive = false;
-let leaderTimeout;
-
+let leaderActive = false, leaderTimeout;
 document.addEventListener('keydown', (e) => {
   if(cmdbar.classList.contains('show')) return; 
   if(document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
-
   if (e.key === ' ' || e.key === 'Spacebar') {
-    e.preventDefault();
-    leaderActive = true;
+    e.preventDefault(); leaderActive = true;
     clearTimeout(leaderTimeout);
     leaderTimeout = setTimeout(() => { leaderActive = false; }, 800);
     return;
   }
-
   if (leaderActive) {
-    if (e.key.toLowerCase() === 'e') {
-      e.preventDefault();
-      toggleSidebar();
-    }
-    leaderActive = false;
-    return; 
+    if (e.key.toLowerCase() === 'e') { e.preventDefault(); toggleSidebar(); }
+    leaderActive = false; return; 
   }
-
   if(e.key === 'j'){ e.preventDefault(); currentIndex = Math.min(currentIndex+1, treeItems.length-1); goTo(treeItems[currentIndex].dataset.section); }
   else if(e.key === 'k'){ e.preventDefault(); currentIndex = Math.max(currentIndex-1, 0); goTo(treeItems[currentIndex].dataset.section); }
-  else if(['1','2','3','4','5'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
+  else if(['1','2','3','4','5','6'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
   else if(e.key === ':'){ e.preventDefault(); openCmd(); }
 });
 
@@ -546,52 +579,36 @@ document.addEventListener('keydown', (e) => {
 const cmdbar = document.getElementById('cmdbar');
 const cmdInput = document.getElementById('cmd-input');
 
-function openCmd(){
-  cmdbar.classList.add('show');
-  cmdInput.value = '';
-  cmdInput.focus();
-}
-function closeCmd(){
-  cmdbar.classList.remove('show');
-  cmdInput.blur();
-}
+function openCmd(){ cmdbar.classList.add('show'); cmdInput.value = ''; cmdInput.focus(); }
+function closeCmd(){ cmdbar.classList.remove('show'); cmdInput.blur(); }
 cmdInput.addEventListener('keydown', (e) => {
   if(e.key === 'Escape'){ closeCmd(); }
   if(e.key === 'Enter'){
-    const cmd = cmdInput.value.trim().toLowerCase();
-    if(['about','stack','projects','notes','contact'].includes(cmd)){
-      goTo(cmd); closeCmd();
-    } else if(cmd === 'q' || cmd === 'q!' || cmd === 'wq'){
-      showToast("can't quit real life that easily :)");
-      closeCmd();
-    } else if (cmd === 'e' || cmd === 'explore' || cmd === 'neotree') {
-      toggleSidebar(); closeCmd();
-    } else if(cmd === 'help' || cmd === ''){
-      showToast('commands: about · stack · projects · notes · contact');
-    } else {
-      showToast('E492: not an editor command: ' + cmd);
-    }
+    const raw = cmdInput.value.trim();
+    const cmd = raw.toLowerCase();
+    if(['about','stack','projects','notes','now','contact'].includes(cmd)){ goTo(cmd); closeCmd(); }
+    else if(cmd === 'q' || cmd === 'q!' || cmd === 'wq'){ showToast("can't quit real life that easily :)"); closeCmd(); }
+    else if(cmd === 'e' || cmd === 'explore' || cmd === 'neotree'){ toggleSidebar(); closeCmd(); }
+    else if(cmd === 'help'){ openHelp(); closeCmd(); }
+    else if(cmd.startsWith('grep ')){ performSearch(raw.slice(5).trim()); closeCmd(); }
+    else if(cmd === ''){ showToast('commands: about · stack · projects · notes · now · contact · help'); closeCmd(); }
+    else { showToast('E492: not an editor command: ' + cmd); closeCmd(); }
   }
 });
-document.addEventListener('click', (e) => {
-  if(cmdbar.classList.contains('show') && !cmdbar.contains(e.target)) closeCmd();
-});
+document.addEventListener('click', (e) => { if(cmdbar.classList.contains('show') && !cmdbar.contains(e.target)) closeCmd(); });
 
 /* ---------------- toast ---------------- */
 let toastTimer;
 function showToast(msg){
   const toast = document.getElementById('toast');
-  toast.textContent = msg;
-  toast.classList.add('show');
-  clearTimeout(toastTimer);
-  toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
+  toast.textContent = msg; toast.classList.add('show');
+  clearTimeout(toastTimer); toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
 }
 
 /* ---------------- copy button ---------------- */
 document.querySelectorAll('.copy-btn').forEach(btn=>{
   btn.addEventListener('click', ()=>{
-    const text = btn.dataset.copy;
-    navigator.clipboard?.writeText(text).then(()=> showToast('copied!')).catch(()=> showToast(text));
+    navigator.clipboard?.writeText(btn.dataset.copy).then(()=> showToast('copied!')).catch(()=> showToast(btn.dataset.copy));
   });
 });
 
@@ -607,54 +624,109 @@ function openPdf(url, title) {
   showToast(`Opened ${title}`);
 }
 function closePdf() {
-  if(pdfViewer.classList.contains('active')) {
-    pdfViewer.classList.remove('active');
-    pdfFrame.src = "";
-    showToast('Closed Zathura');
+  if(pdfViewer.classList.contains('active')) { pdfViewer.classList.remove('active'); pdfFrame.src = ""; showToast('Closed Zathura'); }
+}
+
+/* ---------------- HELP PANEL ---------------- */
+const helpPanel = document.getElementById('help-panel');
+function openHelp() { helpPanel.classList.add('show'); }
+function closeHelp() { helpPanel.classList.remove('show'); }
+document.addEventListener('click', (e) => { if (helpPanel.classList.contains('show') && !helpPanel.contains(e.target)) closeHelp(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && helpPanel.classList.contains('show')) closeHelp(); });
+
+/* ---------------- SEARCH (GREP) ---------------- */
+let searchIndex = [];
+const searchPanel = document.getElementById('search-panel');
+const searchResultsDiv = document.getElementById('search-results');
+
+function buildSearchIndex(repos) {
+  searchIndex = [];
+  repos.forEach(repo => {
+    searchIndex.push({ text: `${repo.name} ${repo.description||''}`, type: 'repo', name: repo.name, link: repo.html_url });
+    (repo.pdfs||[]).forEach(pdf => {
+      searchIndex.push({ text: pdf.path, type: 'pdf', name: pdf.path, repo: repo.name, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${repo.defaultBranch||'main'}/${pdf.path}` });
+    });
+    (repo.mds||[]).forEach(md => {
+      searchIndex.push({ text: md.path, type: 'md', name: md.path, repo: repo.name, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${repo.defaultBranch||'main'}/${md.path}` });
+    });
+  });
+}
+
+function performSearch(query) {
+  if (!query) return;
+  const results = searchIndex.filter(item => item.text.toLowerCase().includes(query.toLowerCase()));
+  searchResultsDiv.innerHTML = '';
+  if (results.length === 0) {
+    searchResultsDiv.innerHTML = '<p class="dim">No matches found.</p>';
+  } else {
+    results.forEach(item => {
+      const div = document.createElement('div');
+      div.className = 'search-item';
+      div.innerHTML = `<span class="type">[${item.type}]</span> <strong>${item.name}</strong> <span class="dim">${item.repo ? 'in '+item.repo : ''}</span>`;
+      div.addEventListener('click', () => {
+        if (item.type === 'pdf') openPdf(item.url, item.name);
+        else if (item.type === 'md') window.open(item.url, '_blank');
+        else if (item.link) window.open(item.link, '_blank');
+        closeSearch();
+      });
+      searchResultsDiv.appendChild(div);
+    });
+  }
+  searchPanel.classList.add('show');
+}
+function closeSearch() { searchPanel.classList.remove('show'); }
+document.addEventListener('click', (e) => { if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch(); });
+document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && searchPanel.classList.contains('show')) closeSearch(); });
+
+/* ---------------- LOAD NOW.MD ---------------- */
+async function loadNow() {
+  const container = document.getElementById('now-content');
+  try {
+    const res = await fetch(NOW_MD_URL);
+    if (!res.ok) throw new Error('Failed to fetch now.md');
+    const rawText = await res.text();
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.style.padding = '0';
+    renderMarkdown(rawText, div);
+    container.appendChild(div);
+  } catch (e) {
+    container.innerHTML = '<p class="dim">Could not load now.md.</p>';
   }
 }
 
 /* ---------------- STATIC MANIFEST LOADER ---------------- */
-const GITHUB_USER = 'u9iver63';
-
 async function loadContent() {
   const projGrid = document.getElementById('proj-grid-container');
   const projLoading = document.getElementById('loading-github');
   const repoCount = document.getElementById('repo-count');
   const projSub = document.getElementById('projects-subtitle');
   const retryProj = document.getElementById('retry-projects');
-
   const pdfContainer = document.getElementById('pdf-list-container');
   const pdfLoading = document.getElementById('loading-pdfs');
   const pdfCount = document.getElementById('pdf-count');
   const pdfSub = document.getElementById('pdf-subtitle');
-
   const mdContainer = document.getElementById('notes-list');
   const mdLoading = document.getElementById('loading-markdown');
   const retryNotes = document.getElementById('retry-notes');
 
-  retryProj.style.display = 'none';
-  retryNotes.style.display = 'none';
-
-  projGrid.innerHTML = ''; projGrid.appendChild(projLoading);
-  pdfContainer.innerHTML = ''; pdfContainer.appendChild(pdfLoading);
-  mdContainer.innerHTML = ''; mdContainer.appendChild(mdLoading);
-  projLoading.style.display = 'block';
-  pdfLoading.style.display = 'block';
-  mdLoading.style.display = 'block';
+  retryProj.style.display = 'none'; retryNotes.style.display = 'none';
+  projGrid.innerHTML = ''; projGrid.appendChild(projLoading); projLoading.style.display = 'block';
+  pdfContainer.innerHTML = ''; pdfContainer.appendChild(pdfLoading); pdfLoading.style.display = 'block';
+  mdContainer.innerHTML = ''; mdContainer.appendChild(mdLoading); mdLoading.style.display = 'block';
 
   try {
     const res = await fetch('manifest.json');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const repos = await res.json();
-
     if (repos.length === 0) throw new Error('No repos found in manifest');
+
+    buildSearchIndex(repos);
 
     projLoading.remove();
     const displayedRepos = repos.slice(0, 12);
     repoCount.textContent = displayedRepos.length + ' repos';
     projSub.textContent = 'repositories from static manifest';
-
     displayedRepos.forEach(repo => {
       const card = document.createElement('div');
       card.className = 'proj-card';
@@ -663,44 +735,21 @@ async function loadContent() {
       const desc = repo.description || 'No description provided.';
       const starBadge = repo.stargazers_count > 0 ? `<span>⭐ ${repo.stargazers_count}</span>` : '';
       const forkBadge = repo.forks_count > 0 ? `<span>🍴 ${repo.forks_count}</span>` : '';
-      card.innerHTML = `
-        <a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="repo-link">
-          <div class="proj-head">
-            <h3>${repo.name}</h3>
-            <span class="status">${new Date(repo.pushed_at || repo.pushedAt).toLocaleDateString()}</span>
-          </div>
-          <p>${desc}</p>
-          <div class="meta-badges">${langTag}${starBadge}${forkBadge}</div>
-        </a>`;
+      card.innerHTML = `<a href="${repo.html_url}" target="_blank" rel="noopener noreferrer" class="repo-link"><div class="proj-head"><h3>${repo.name}</h3><span class="status">${new Date(repo.pushed_at || repo.pushedAt).toLocaleDateString()}</span></div><p>${desc}</p><div class="meta-badges">${langTag}${starBadge}${forkBadge}</div></a>`;
       projGrid.appendChild(card);
     });
 
-    let allPdfs = [];
-    let allMds = [];
+    let allPdfs = [], allMds = [];
     repos.forEach(repo => {
       const branch = repo.defaultBranch || 'main';
-      (repo.pdfs || []).forEach(pdf => {
-        allPdfs.push({
-          name: pdf.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`,
-          size: pdf.size,
-          repo: repo.name
-        });
-      });
-      (repo.mds || []).forEach(md => {
-        allMds.push({
-          name: md.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`,
-          repo: repo.name
-        });
-      });
+      (repo.pdfs||[]).forEach(pdf => allPdfs.push({ name: pdf.path, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`, size: pdf.size, repo: repo.name }));
+      (repo.mds||[]).forEach(md => allMds.push({ name: md.path, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`, repo: repo.name }));
     });
 
     pdfLoading.remove();
     if (allPdfs.length === 0) {
       pdfContainer.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
-      pdfCount.textContent = '0';
-      pdfSub.textContent = 'No PDFs found across repos';
+      pdfCount.textContent = '0'; pdfSub.textContent = 'No PDFs found across repos';
     } else {
       pdfCount.textContent = allPdfs.length + ' PDFs';
       pdfSub.textContent = 'Click to view in Zathura';
@@ -721,13 +770,7 @@ async function loadContent() {
       allMds.forEach(md => {
         const noteDiv = document.createElement('div');
         noteDiv.className = 'note-item';
-        noteDiv.innerHTML = `
-          <button class="note-head">
-            <span>${md.name}</span>
-            <span class="date">${md.repo}</span>
-            <span class="arrow">›</span>
-          </button>
-          <div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
+        noteDiv.innerHTML = `<button class="note-head"><span>${md.name}</span><span class="date">${md.repo}</span><span class="arrow">›</span></button><div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
         mdContainer.appendChild(noteDiv);
         const headBtn = noteDiv.querySelector('.note-head');
         const bodyInner = noteDiv.querySelector('.note-body-inner');
@@ -737,7 +780,8 @@ async function loadContent() {
             try {
               const res = await fetch(md.url);
               if (!res.ok) throw new Error('Failed to fetch');
-              bodyInner.textContent = await res.text();
+              const rawText = await res.text();
+              renderMarkdown(rawText, bodyInner);
             } catch (err) {
               bodyInner.textContent = 'Error loading content.';
             }
@@ -746,36 +790,22 @@ async function loadContent() {
       });
       showToast(`Loaded ${allMds.length} Markdown notes`);
     }
-
   } catch (error) {
     console.warn(error);
     projLoading.textContent = '⚠️ Could not load manifest.';
     pdfLoading.textContent = '⚠️ Could not load manifest.';
     mdLoading.textContent = '⚠️ Could not load manifest.';
-    retryProj.style.display = 'block';
-    retryNotes.style.display = 'block';
+    retryProj.style.display = 'block'; retryNotes.style.display = 'block';
     showToast('Manifest not found – generate it first');
   }
 }
 
-function getLanguageColor(lang) {
-  const colors = {
-    'JavaScript': '#f1e05a', 'Python': '#3572A5', 'TypeScript': '#3178c6',
-    'Rust': '#dea584', 'C++': '#f34b7d', 'Haskell': '#5e5086',
-    'Julia': '#a270ba', 'Typst': '#239DAD', 'Lean': '#17980E',
-    'Shell': '#89e051', 'Jupyter Notebook': '#DA5B0B'
-  };
-  return colors[lang] || 'var(--blue)';
-}
+function getLanguageColor(lang) { const colors = { 'JavaScript':'#f1e05a','Python':'#3572A5','TypeScript':'#3178c6','Rust':'#dea584','C++':'#f34b7d','Haskell':'#5e5086','Julia':'#a270ba','Typst':'#239DAD','Lean':'#17980E','Shell':'#89e051','Jupyter Notebook':'#DA5B0B' }; return colors[lang] || 'var(--blue)'; }
+function formatSize(bytes) { if (!bytes) return 'unknown'; if (bytes < 1024) return bytes + ' B'; if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/1048576).toFixed(1) + ' MB'; }
 
-function formatSize(bytes) {
-  if (!bytes) return 'unknown';
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
+/* ---------------- Kick off everything ---------------- */
 loadContent();
+loadNow();
 </script>
 
 <noscript>
@@ -783,6 +813,5 @@ loadContent();
     This terminal requires JavaScript. Please enable it or visit my <a href="https://github.com/surojplalunga">GitHub</a>.
   </div>
 </noscript>
-
 </body>
 </html>
