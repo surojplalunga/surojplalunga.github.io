@@ -773,7 +773,9 @@ async function loadVideos() {
   retryEl.style.display = 'none';
 
   try {
-    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`;
+    const rssUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
+  `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`
+)}`;
     const response = await fetch(rssUrl);
     if (!response.ok) throw new Error('RSS not available');
     const text = await response.text();
