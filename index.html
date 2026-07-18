@@ -40,7 +40,6 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/haskell.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
-<script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/lean.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.0/marked.min.js"></script>
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/github-markdown-css/5.5.1/github-markdown-dark.css">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
@@ -150,13 +149,8 @@
   .contact-form input:focus, .contact-form textarea:focus { border-color:var(--blue); outline:none; }
   .contact-form button[type="submit"] { background:var(--blue); border:none; color:var(--bg2); padding:8px 16px; cursor:pointer; font-weight:700; transition:background .15s; }
   .contact-form button[type="submit"]:hover { background:#6d8fd8; }
-  .video-list { display:flex; flex-direction:column; gap:6px; }
-  .video-item { display:flex; align-items:flex-start; gap:14px; padding:10px 12px; background:var(--panel); border:1px solid var(--line); border-radius:4px; cursor:pointer; transition:background .15s,border-color .15s; }
-  .video-item:hover { background:#252836; border-color:var(--blue); }
-  .video-thumb { width:100px; height:56px; object-fit:cover; border-radius:3px; flex-shrink:0; background:var(--bg2); }
-  .video-info { display:flex; flex-direction:column; gap:4px; } .video-title { color:var(--text); font-weight:500; font-size:0.88rem; } .video-date { color:var(--text-dimmer); font-size:0.72rem; } .video-duration { color:var(--text-dim); font-size:0.68rem; margin-top:2px; }
   @media print { .statusline,.sidebar,.bufferline,.cmdbar,.toast-container,.scroll-top-btn,.floating-panel,.zathura-viewer,.copy-btn { display:none!important; } body { background:white; color:black; font-family:'JetBrains Mono',monospace; } .buffer { padding:0; max-width:100%; display:block!important; opacity:1!important; } .buffer .lines { border-left:none; } .line::before { display:none; } .main-content { overflow:visible; } a { color:black; border-bottom:none; } }
-  @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } .video-item { flex-direction:column; } .video-thumb { width:100%; height:auto; } }
+  @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } }
 </style>
 </head>
 <body>
@@ -183,10 +177,9 @@
     <button class="tree-item" data-section="projects" data-mode="INSERT" data-color="#9ECE6A" role="tab" aria-selected="false"><span class="icon">▾</span> projects/</button>
     <button class="tree-item" data-section="notes" data-mode="VISUAL" data-color="#BB9AF7" role="tab" aria-selected="false"><span class="icon">▾</span> notes/</button>
     <button class="tree-item" data-section="now" data-mode="INSERT" data-color="#7DCFFF" role="tab" aria-selected="false"><span class="icon">▸</span> now.md</button>
-    <button class="tree-item" data-section="videos" data-mode="NORMAL" data-color="#E0AF68" role="tab" aria-selected="false"><span class="icon">▸</span> videos.md</button>
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false"><span class="icon">▸</span> contact.txt</button>
     <div class="sidebar-hint">
-      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>7</kbd> navigate</div>
+      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>6</kbd> navigate</div>
       <div><kbd>SPC</kbd> <kbd>e</kbd> toggle explorer</div>
       <div><kbd>:</kbd> command mode</div>
     </div>
@@ -270,16 +263,6 @@
         <div class="lines" id="now-content"><p class="loading-placeholder">⟳ loading now.md…</p></div>
       </section>
 
-      <!-- VIDEOS -->
-      <section class="buffer" data-section="videos" role="tabpanel">
-        <span class="filename-tag">~/suroj-plalunga/videos.md — 1 buffer</span>
-        <h1>videos</h1>
-        <p class="dim">Latest from <a href="https://www.youtube.com/@surojlimbu-re5hk" target="_blank">youtube.com/@surojlimbu-re5hk</a></p>
-        <div id="video-loading" class="loading-placeholder">⟳ fetching videos…</div>
-        <div class="video-list" id="video-list-container"></div>
-        <div id="retry-videos" style="display:none; margin-top:10px;"><button onclick="loadVideos()" style="background:var(--panel);border:1px solid var(--line);color:var(--blue);padding:6px 12px;">Retry</button></div>
-      </section>
-
       <!-- CONTACT -->
       <section class="buffer" data-section="contact" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
@@ -304,7 +287,7 @@
 
 <div class="cmdbar" id="cmdbar" role="dialog" aria-label="command input">
   <span class="colon">:</span>
-  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · videos · contact · help" aria-label="command">
+  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · contact · help" aria-label="command">
   <span class="cursor-blink"></span>
   <span class="cmd-hint">enter to run · esc to cancel</span>
 </div>
@@ -317,10 +300,10 @@
   <h3>📖 Help</h3>
   <ul>
     <li><span class="key">j</span> / <span class="key">k</span> – navigate sections</li>
-    <li><span class="key">1</span>–<span class="key">7</span> – jump to section</li>
+    <li><span class="key">1</span>–<span class="key">6</span> – jump to section</li>
     <li><span class="key">SPC</span> <span class="key">e</span> – toggle file tree</li>
     <li><span class="key">:</span> – open command bar</li>
-    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:videos</span> / <span class="key">:contact</span></li>
+    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:contact</span></li>
     <li><span class="key">:resume</span> – download resume</li>
     <li><span class="key">:help</span> – this window</li>
     <li><span class="key">:grep &lt;query&gt;</span> – search across projects, PDFs, notes</li>
@@ -339,7 +322,6 @@
 const GITHUB_USER = 'u9iver63';
 const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
 const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`;
-const YOUTUBE_CHANNEL_ID = 'UCcdfcSE9TOn0x0YH8qn18Ig';
 
 window.RESUME_URL = RESUME_URL;
 
@@ -414,7 +396,7 @@ const buffers = Array.from(document.querySelectorAll('.buffer'));
 const modePill = document.getElementById('mode-pill');
 const statusFile = document.getElementById('status-file');
 const bufferline = document.getElementById('bufferline');
-const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', now:'now.md', videos:'videos.md', contact:'contact.txt' };
+const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', now:'now.md', contact:'contact.txt' };
 let currentIndex = 0;
 
 function renderBufferline() {
@@ -437,7 +419,7 @@ function renderBufferline() {
 function goTo(section) {
   const item = treeItems.find(t => t.dataset.section === section);
   if(!item) return;
-  if(section !== 'notes' && section !== 'videos') closeMedia();
+  if(section !== 'notes') closeMedia();
   treeItems.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
   buffers.forEach(b => b.classList.remove('active'));
   item.classList.add('active');
@@ -449,7 +431,6 @@ function goTo(section) {
   currentIndex = treeItems.indexOf(item);
   renderBufferline();
   if (window.innerWidth <= 768) closeSidebar();
-  if (section === 'videos' && !videosLoaded) loadVideos();
 }
 
 treeItems.forEach(item => item.addEventListener('click', () => goTo(item.dataset.section)));
@@ -472,7 +453,7 @@ document.addEventListener('keydown', (e) => {
   }
   if(e.key === 'j'){ e.preventDefault(); currentIndex = Math.min(currentIndex+1, treeItems.length-1); goTo(treeItems[currentIndex].dataset.section); }
   else if(e.key === 'k'){ e.preventDefault(); currentIndex = Math.max(currentIndex-1, 0); goTo(treeItems[currentIndex].dataset.section); }
-  else if(['1','2','3','4','5','6','7'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
+  else if(['1','2','3','4','5','6'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
   else if(e.key === ':'){ e.preventDefault(); openCmd(); }
   else if(e.key === 'Escape'){ closeHelp(); closeSearch(); closeMedia(); }
 });
@@ -510,13 +491,13 @@ cmdInput.addEventListener('keydown', (e) => {
 
 function executeCommand(raw) {
   const cmd = raw.toLowerCase();
-  if(['about','stack','projects','notes','now','videos','contact'].includes(cmd)){ goTo(cmd); }
+  if(['about','stack','projects','notes','now','contact'].includes(cmd)){ goTo(cmd); }
   else if(cmd === 'q' || cmd === 'q!' || cmd === 'wq'){ showToast("can't quit real life that easily :)"); }
   else if(cmd === 'e' || cmd === 'explore' || cmd === 'neotree'){ toggleSidebar(); }
   else if(cmd === 'help'){ openHelp(); }
   else if(cmd === 'resume'){ window.open(RESUME_URL, '_blank'); showToast('Opening resume…'); }
   else if(cmd.startsWith('grep ')){ performSearch(raw.slice(5).trim()); }
-  else if(cmd === ''){ showToast('commands: about · stack · projects · notes · now · videos · contact · help · resume'); }
+  else if(cmd === ''){ showToast('commands: about · stack · projects · notes · now · contact · help · resume'); }
   else { showToast('E492: not an editor command: ' + cmd); }
 }
 
@@ -755,67 +736,6 @@ async function loadContent() {
 
 function getLanguageColor(lang) { const colors = { 'JavaScript':'#f1e05a','Python':'#3572A5','TypeScript':'#3178c6','Rust':'#dea584','C++':'#f34b7d','Haskell':'#5e5086','Julia':'#a270ba','Typst':'#239DAD','Lean':'#17980E','Shell':'#89e051','Jupyter Notebook':'#DA5B0B' }; return colors[lang] || 'var(--blue)'; }
 function formatSize(bytes) { if (!bytes) return 'unknown'; if (bytes < 1024) return bytes + ' B'; if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/1048576).toFixed(1) + ' MB'; }
-
-/* ---------------- YOUTUBE VIDEOS LOADER ---------------- */
-let videosLoaded = false;
-
-async function loadVideos() {
-  const loadingEl = document.getElementById('video-loading');
-  const container = document.getElementById('video-list-container');
-  const retryEl = document.getElementById('retry-videos');
-
-  if (!YOUTUBE_CHANNEL_ID || !YOUTUBE_CHANNEL_ID.startsWith('UC')) {
-    loadingEl.innerHTML = '<p class="dim">Invalid YouTube channel ID (must start with UC).</p>';
-    return;
-  }
-
-  loadingEl.style.display = 'block';
-  retryEl.style.display = 'none';
-
-  try {
-    const rssUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(
-  `https://www.youtube.com/feeds/videos.xml?channel_id=${YOUTUBE_CHANNEL_ID}`
-)}`;
-    const response = await fetch(rssUrl);
-    if (!response.ok) throw new Error('RSS not available');
-    const text = await response.text();
-    const parser = new DOMParser();
-    const xml = parser.parseFromString(text, 'application/xml');
-    const entries = xml.querySelectorAll('entry');
-    if (!entries.length) throw new Error('No videos found');
-
-    container.innerHTML = '';
-    entries.forEach(entry => {
-      const title = entry.querySelector('title')?.textContent || 'Untitled';
-      const link = entry.querySelector('link')?.getAttribute('href') || '';
-      const published = entry.querySelector('published')?.textContent || '';
-      const mediaGroup = entry.querySelector('media\\:group, group');
-      const thumbnail = mediaGroup?.querySelector('media\\:thumbnail, thumbnail')?.getAttribute('url') || '';
-      const videoId = link.split('v=')[1]?.split('&')[0] || '';
-
-      const videoDiv = document.createElement('div');
-      videoDiv.className = 'video-item';
-      videoDiv.innerHTML = `
-        <img class="video-thumb" src="${thumbnail}" alt="thumbnail" loading="lazy">
-        <div class="video-info">
-          <span class="video-title">${title}</span>
-          <span class="video-date">${new Date(published).toLocaleDateString()}</span>
-          <span class="video-duration">▶ Play</span>
-        </div>`;
-      videoDiv.addEventListener('click', () => {
-        openMedia(`https://www.youtube.com/embed/${videoId}`, title);
-      });
-      container.appendChild(videoDiv);
-    });
-
-    loadingEl.style.display = 'none';
-    videosLoaded = true;
-  } catch (error) {
-    console.warn(error);
-    loadingEl.innerHTML = '<p class="dim">Could not load videos. Visit <a href="https://www.youtube.com/@surojlimbu-re5hk" target="_blank">channel</a>.</p>';
-    retryEl.style.display = 'block';
-  }
-}
 
 /* ---------------- Kick off ---------------- */
 loadContent();
