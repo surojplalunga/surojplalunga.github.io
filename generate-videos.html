@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Generate videos.json</title>
+<style>
+  body { background:#1A1B26; color:#C0CAF5; font-family:sans-serif; max-width:500px; margin:40px auto; }
+  input, button { padding:8px; margin:5px 0; width:100%; box-sizing:border-box; }
+  button { background:#7AA2F7; border:none; color:#1A1B26; font-weight:bold; cursor:pointer; }
+  #status { margin-top:10px; color:#9ECE6A; }
+</style>
+</head>
+<body>
+<h2>Generate videos.json</h2>
+<label>YouTube channel ID (starts with UC)</label>
+<input id="channelId" placeholder="UCcdfcSE9TOn0x0YH8qn18Ig" value="UCcdfcSE9TOn0x0YH8qn18Ig" />
+<button onclick="generate()">Generate & Download</button>
+<div id="status"></div>
+<script>
+async function generate() {
+  const channelId = document.getElementById('channelId').value.trim();
+  const status = document.getElementById('status');
+  if (!channelId || !channelId.startsWith('UC')) {
+    status.textContent = 'Invalid channel ID (must start with UC).';
+    return;
+  }
+  status.textContent = 'Fetching videos…';
+  try {
+    const rssUrl = `https://www.youtube.com/feeds/videos.xml?channel_id=${channelId}`;
+    // We'll use a CORS proxy only for the one-time fetch
+    const proxyUrl = `https://api.allorigins.win/raw?url=${encodeURIComponent(rssUrl)}`;
+    const response = await fetch(proxyUrl);
+    if (!response.ok) throw new Error('RSS not available');
+    const text = await response.text();
+    const parser = new DOMParser();
+    const xml = parser.parseFromString(text, 'application/xml');
+    const entries = xml.querySelectorAll('entry');
+    if (!entries.length) throw new Error('No videos found');
+
+    const videos = [];
+    entries.forEach(entry => {
+      const title = entry.querySelector('title')?.textContent || 'Untitled';
+      const link = entry.querySelector('link')?.getAttribute('href') || '';
+      const published = entry.querySelector('published')?.textContent || '';
+      const mediaGroup = entry.querySelector('media\\:group, group');
+      const thumbnail = mediaGroup?.querySelector('media\\:thumbnail, thumbnail')?.getAttribute('url') || '';
+      const videoId = link.split('v=')[1]?.split('&')[0] || '';
+      videos.push({ title, videoId, thumbnail, published });
+    });
+
+    const blob = new Blob([JSON.stringify(videos, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = 'videos.json';
+    a.click();
+    URL.revokeObjectURL(url);
+    status.textContent = 'videos.json downloaded! Place it next to index.html.';
+  } catch (e) {
+    status.textContent = 'Error: ' + e.message;
+  }
+}
+</script>
+</body>
+</html>
