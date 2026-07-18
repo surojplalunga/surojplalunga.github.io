@@ -243,51 +243,25 @@
       </div>
     </section>
 
-    <!-- PROJECTS (dynamic GitHub content) -->
+    <!-- PROJECTS (from manifest) -->
     <section class="buffer" data-section="projects">
-      <span class="filename-tag">~/suroj-plalunga/projects/ — <span id="repo-count">fetching...</span></span>
+      <span class="filename-tag">~/suroj-plalunga/projects/ — <span id="repo-count">loading...</span></span>
       <h1>projects</h1>
-      <p class="dim" id="projects-subtitle">repositories from GitHub — sorted by recent activity</p>
+      <p class="dim" id="projects-subtitle">repositories from static manifest</p>
       <div class="proj-grid" id="proj-grid-container">
         <div class="loading-placeholder" id="loading-github">
-          <span class="mono">⟳ fetching github.com/u9iver63/repos...</span>
-        </div>
-      </div>
-      <div id="static-projects-fallback" style="display:none;">
-        <h2 style="margin-top:20px;">## offline_fallback</h2>
-        <p class="dim">Static snapshot — live data unavailable.</p>
-        <div class="proj-grid">
-          <div class="proj-card" style="border-left-color:var(--green);">
-            <div class="proj-head"><h3>typst-package-arch</h3><span class="status">in progress</span></div>
-            <p>Architecting a large, pure-Typst package with a layered core/draw/lib split.</p>
-            <div class="tags"><span>Typst</span><span>package design</span></div>
-          </div>
-          <div class="proj-card" style="border-left-color:var(--cyan);">
-            <div class="proj-head"><h3>symbolic-calc-wasm</h3><span class="status">prototyping</span></div>
-            <p>Symbolic differentiation plugin for Typst: Rust → WASM.</p>
-            <div class="tags"><span>Rust</span><span>WASM</span><span>Typst</span></div>
-          </div>
-          <div class="proj-card" style="border-left-color:var(--magenta);">
-            <div class="proj-head"><h3>ml-for-math</h3><span class="status">learning path</span></div>
-            <p>PyTorch → symbolic regression with PySR → neural theorem proving.</p>
-            <div class="tags"><span>PyTorch</span><span>PySR</span></div>
-          </div>
-          <div class="proj-card" style="border-left-color:var(--yellow);">
-            <div class="proj-head"><h3>lean-formalizations</h3><span class="status">exploring</span></div>
-            <p>Lean 4 formalizations against Mathlib4 + DeepSeek-Prover-V2 pipeline.</p>
-            <div class="tags"><span>Lean 4</span><span>Mathlib4</span></div>
-          </div>
+          <span class="mono">⟳ loading manifest…</span>
         </div>
       </div>
     </section>
 
-    <!-- NOTES & PDFs (dynamic from all GitHub repos) -->
+    <!-- NOTES & PDFs (from manifest) -->
     <section class="buffer" data-section="notes">
-      <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">fetching...</span></span>
+      <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">loading...</span></span>
       <h1>notes & proofs</h1>
       
       <h2>## compiled_pdfs</h2>
-      <p class="dim" id="pdf-subtitle">Scanning all your public repos for PDFs…</p>
+      <p class="dim" id="pdf-subtitle">Loading from manifest…</p>
       
       <div class="zathura-viewer" id="zathura-viewer">
         <div class="zathura-bar">
@@ -299,7 +273,7 @@
 
       <div class="pdf-grid" id="pdf-list-container">
         <div class="loading-placeholder" id="loading-pdfs">
-          <span class="mono">⟳ fetching PDFs from all repositories…</span>
+          <span class="mono">⟳ loading PDFs from manifest…</span>
         </div>
       </div>
 
@@ -307,7 +281,7 @@
       <p class="dim">Markdown notes from your repositories — click to expand.</p>
       <div id="notes-list">
         <div class="loading-placeholder" id="loading-markdown">
-          <span class="mono">⟳ fetching Markdown files…</span>
+          <span class="mono">⟳ loading Markdown files…</span>
         </div>
       </div>
     </section>
@@ -505,28 +479,15 @@ function closePdf() {
   }
 }
 
-/* ---------------- GITHUB CONTENT SCANNER (with caching) ---------------- */
-async function fetchAllRepos(username) {
-  const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
-  if (!reposRes.ok) throw new Error(`GitHub repos API error: ${reposRes.status}`);
-  const repos = await reposRes.json();
-  return repos.filter(r => !r.fork);
-}
+/* ---------------- STATIC MANIFEST LOADER ---------------- */
+const GITHUB_USER = 'u9iver63';   // <-- change to your actual GitHub username
 
-async function scanRepoTree(username, repoName, defaultBranch) {
-  const branch = defaultBranch || 'main';
-  const treeRes = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`);
-  if (!treeRes.ok) return [];
-  const treeData = await treeRes.json();
-  return treeData.tree || [];
-}
+async function loadFromManifest() {
+  const projGrid = document.getElementById('proj-grid-container');
+  const projLoading = document.getElementById('loading-github');
+  const repoCount = document.getElementById('repo-count');
+  const projSub = document.getElementById('projects-subtitle');
 
-function buildRawUrl(username, repoName, branch, filePath) {
-  return `https://raw.githubusercontent.com/${username}/${repoName}/${branch}/${filePath}`;
-}
-
-/* ---------------- PDF + Markdown loader (with sessionStorage cache) ---------------- */
-async function loadAllNotes(username) {
   const pdfContainer = document.getElementById('pdf-list-container');
   const mdContainer = document.getElementById('notes-list');
   const pdfLoading = document.getElementById('loading-pdfs');
@@ -534,174 +495,17 @@ async function loadAllNotes(username) {
   const pdfCount = document.getElementById('pdf-count');
   const pdfSub = document.getElementById('pdf-subtitle');
 
-  // Check cache first
-  const cacheKey = `notes_cache_${username}`;
-  const cached = sessionStorage.getItem(cacheKey);
-  if (cached) {
-    try {
-      const data = JSON.parse(cached);
-      renderPDFs(data.pdfs, pdfContainer, pdfCount, pdfSub);
-      renderMarkdownFiles(data.mds, mdContainer);
-      pdfLoading.remove();
-      mdLoading.remove();
-      return;
-    } catch(e) { sessionStorage.removeItem(cacheKey); }
-  }
-
-  // Show loading state
-  pdfLoading.style.display = 'block';
-  mdLoading.style.display = 'block';
-  pdfCount.textContent = 'fetching...';
-  pdfSub.textContent = 'Scanning repositories...';
-
   try {
-    const repos = await fetchAllRepos(username);
-    if (repos.length === 0) {
-      pdfLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
-      mdLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
-      pdfCount.textContent = '0';
-      return;
-    }
+    const res = await fetch('manifest.json');
+    if (!res.ok) throw new Error('Manifest not found');
+    const repos = await res.json();
 
-    let allPdfs = [];
-    let allMds = [];
+    // --- Projects ---
+    projLoading.remove();
+    const displayedRepos = repos.slice(0, 12);
+    repoCount.textContent = displayedRepos.length + ' repos';
+    projSub.textContent = 'repositories from static manifest — sorted by recent activity';
 
-    for (const repo of repos) {
-      const branch = repo.default_branch || 'main';
-      try {
-        const tree = await scanRepoTree(username, repo.name, branch);
-        for (const item of tree) {
-          if (item.type !== 'blob') continue;
-          const url = buildRawUrl(username, repo.name, branch, item.path);
-          if (item.path.toLowerCase().endsWith('.pdf')) {
-            allPdfs.push({ name: item.path, url, size: item.size, repo: repo.name });
-          } else if (item.path.toLowerCase().endsWith('.md')) {
-            allMds.push({ name: item.path, url, repo: repo.name });
-          }
-        }
-      } catch (e) { continue; }
-    }
-
-    // Cache results
-    sessionStorage.setItem(cacheKey, JSON.stringify({ pdfs: allPdfs, mds: allMds }));
-
-    pdfLoading.remove();
-    mdLoading.remove();
-
-    renderPDFs(allPdfs, pdfContainer, pdfCount, pdfSub);
-    renderMarkdownFiles(allMds, mdContainer);
-
-  } catch (error) {
-    console.warn(error);
-    pdfLoading.innerHTML = `<span class="mono">⚠️ GitHub API rate limit exceeded or network error. Try again later.</span>`;
-    mdLoading.innerHTML = `<span class="mono">⚠️ GitHub API rate limit exceeded or network error. Try again later.</span>`;
-    pdfCount.textContent = 'offline';
-    pdfSub.textContent = 'Could not reach GitHub';
-    // fallback static PDFs
-    const fallbackPdfs = [
-      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'topology-hw-4.pdf', size: 420000 },
-      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'elliptic-curves-intro.pdf', size: 1200000 },
-      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'typst-calculus-plugin-docs.pdf', size: 850000 }
-    ];
-    renderPDFs(fallbackPdfs, pdfContainer, pdfCount, pdfSub);
-    showToast('⚠️ Using cached/offline data');
-  }
-}
-
-function renderPDFs(pdfs, container, countSpan, subtitle) {
-  if (pdfs.length === 0) {
-    container.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
-    countSpan.textContent = '0';
-    subtitle.textContent = 'No PDFs found across your repos.';
-    return;
-  }
-  countSpan.textContent = pdfs.length + ' PDFs';
-  subtitle.textContent = `Scanned repos — click to view in Zathura`;
-  pdfs.forEach(pdf => {
-    const pdfItem = document.createElement('div');
-    pdfItem.className = 'pdf-item';
-    pdfItem.setAttribute('data-src', pdf.url);
-    pdfItem.setAttribute('data-title', pdf.name);
-    const sizeText = pdf.size ? formatSize(pdf.size) : 'unknown';
-    pdfItem.innerHTML = `
-      <span>📄 <span style="color:var(--yellow);">${pdf.repo ? pdf.repo+'/' : ''}</span>${pdf.name}</span>
-      <span class="size">${sizeText}</span>
-    `;
-    pdfItem.addEventListener('click', () => openPdf(pdf.url, pdf.name));
-    container.appendChild(pdfItem);
-  });
-}
-
-function renderMarkdownFiles(mds, container) {
-  if (mds.length === 0) {
-    container.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
-    return;
-  }
-  mds.sort((a,b) => a.name.localeCompare(b.name));
-  mds.forEach(md => {
-    const noteDiv = document.createElement('div');
-    noteDiv.className = 'note-item';
-    noteDiv.innerHTML = `
-      <button class="note-head">
-        <span>${md.name}</span>
-        <span class="date mono">${md.repo}</span>
-        <span class="arrow">›</span>
-      </button>
-      <div class="note-body"><div class="note-body-inner">Loading...</div></div>
-    `;
-    container.appendChild(noteDiv);
-    const headBtn = noteDiv.querySelector('.note-head');
-    const bodyInner = noteDiv.querySelector('.note-body-inner');
-    headBtn.addEventListener('click', async () => {
-      noteDiv.classList.toggle('open');
-      if (noteDiv.classList.contains('open') && bodyInner.textContent === 'Loading...') {
-        try {
-          const res = await fetch(md.url);
-          if (!res.ok) throw new Error('Failed to fetch');
-          bodyInner.textContent = await res.text();
-        } catch (err) {
-          bodyInner.textContent = 'Error loading content.';
-        }
-      }
-    });
-  });
-  showToast(`Loaded ${mds.length} Markdown notes`);
-}
-
-function formatSize(bytes) {
-  if (bytes < 1024) return bytes + ' B';
-  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
-  return (bytes / 1048576).toFixed(1) + ' MB';
-}
-
-/* ---------------- start loading notes ---------------- */
-const GITHUB_USER = 'u9iver63';  // change to your GitHub username
-loadAllNotes(GITHUB_USER);
-
-/* ---------------- GITHUB PROJECTS AUTO-LOAD ---------------- */
-async function loadGitHubProjects(username) {
-  const container = document.getElementById('proj-grid-container');
-  const loadingEl = document.getElementById('loading-github');
-  const countSpan = document.getElementById('repo-count');
-  const subtitle = document.getElementById('projects-subtitle');
-  const fallbackDiv = document.getElementById('static-projects-fallback');
-  
-  const API_URL = `https://api.github.com/users/${username}/repos?sort=pushed&per_page=100`;
-  
-  try {
-    const response = await fetch(API_URL);
-    if (!response.ok) throw new Error(`GitHub API responded with ${response.status}`);
-    
-    const repos = await response.json();
-    if (!repos.length) throw new Error('No public repositories found.');
-    
-    loadingEl.remove();
-    
-    const displayedRepos = repos.filter(repo => !repo.fork).slice(0, 12);
-    
-    countSpan.textContent = displayedRepos.length + ' repos';
-    subtitle.textContent = 'live from GitHub — sorted by last push';
-    
     displayedRepos.forEach(repo => {
       const card = document.createElement('div');
       card.className = 'proj-card';
@@ -716,7 +520,7 @@ async function loadGitHubProjects(username) {
         <a href="${repo.html_url}" target="_blank" class="repo-link">
           <div class="proj-head">
             <h3>${repo.name}</h3>
-            <span class="status">${new Date(repo.pushed_at).toLocaleDateString()}</span>
+            <span class="status">${new Date(repo.pushedAt).toLocaleDateString()}</span>
           </div>
           <p>${desc}</p>
           <div class="meta-badges">
@@ -726,16 +530,96 @@ async function loadGitHubProjects(username) {
           </div>
         </a>
       `;
-      container.appendChild(card);
+      projGrid.appendChild(card);
     });
-    
+
+    // --- PDFs and Markdown files from all repos ---
+    let allPdfs = [];
+    let allMds = [];
+    repos.forEach(repo => {
+      const branch = repo.defaultBranch || 'main';
+      (repo.pdfs || []).forEach(pdf => {
+        allPdfs.push({
+          name: pdf.path,
+          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`,
+          size: pdf.size,
+          repo: repo.name
+        });
+      });
+      (repo.mds || []).forEach(md => {
+        allMds.push({
+          name: md.path,
+          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`,
+          repo: repo.name
+        });
+      });
+    });
+
+    // --- PDFs ---
+    pdfLoading.remove();
+    if (allPdfs.length === 0) {
+      pdfContainer.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
+      pdfCount.textContent = '0';
+      pdfSub.textContent = 'No PDFs found across your repos.';
+    } else {
+      pdfCount.textContent = allPdfs.length + ' PDFs';
+      pdfSub.textContent = 'Scanned repos — click to view in Zathura';
+      allPdfs.forEach(pdf => {
+        const pdfItem = document.createElement('div');
+        pdfItem.className = 'pdf-item';
+        pdfItem.innerHTML = `
+          <span>📄 <span style="color:var(--yellow);">${pdf.repo}/</span>${pdf.name}</span>
+          <span class="size">${formatSize(pdf.size)}</span>
+        `;
+        pdfItem.addEventListener('click', () => openPdf(pdf.url, pdf.name));
+        pdfContainer.appendChild(pdfItem);
+      });
+    }
+
+    // --- Markdown notes ---
+    mdLoading.remove();
+    if (allMds.length === 0) {
+      mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
+    } else {
+      allMds.sort((a,b) => a.name.localeCompare(b.name));
+      allMds.forEach(md => {
+        const noteDiv = document.createElement('div');
+        noteDiv.className = 'note-item';
+        noteDiv.innerHTML = `
+          <button class="note-head">
+            <span>${md.name}</span>
+            <span class="date mono">${md.repo}</span>
+            <span class="arrow">›</span>
+          </button>
+          <div class="note-body"><div class="note-body-inner">Loading...</div></div>
+        `;
+        mdContainer.appendChild(noteDiv);
+        const headBtn = noteDiv.querySelector('.note-head');
+        const bodyInner = noteDiv.querySelector('.note-body-inner');
+        headBtn.addEventListener('click', async () => {
+          noteDiv.classList.toggle('open');
+          if (noteDiv.classList.contains('open') && bodyInner.textContent === 'Loading...') {
+            try {
+              const res = await fetch(md.url);
+              if (!res.ok) throw new Error('Failed to fetch');
+              bodyInner.textContent = await res.text();
+            } catch (err) {
+              bodyInner.textContent = 'Error loading content.';
+            }
+          }
+        });
+      });
+      showToast(`Loaded ${allMds.length} Markdown notes`);
+    }
+
   } catch (error) {
-    console.warn('GitHub fetch failed, using static fallback:', error);
-    loadingEl.remove();
-    countSpan.textContent = 'offline';
-    subtitle.textContent = 'could not reach GitHub API — showing static snapshot';
-    fallbackDiv.style.display = 'block';
-    showToast('⚠️ GitHub API unreachable — loaded offline fallback');
+    console.warn(error);
+    projLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
+    pdfLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
+    mdLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
+    repoCount.textContent = 'offline';
+    projSub.textContent = 'could not reach manifest';
+    showToast('⚠️ Could not load content manifest');
   }
 }
 
@@ -756,7 +640,15 @@ function getLanguageColor(lang) {
   return colors[lang] || 'var(--blue)';
 }
 
-loadGitHubProjects(GITHUB_USER);
+function formatSize(bytes) {
+  if (!bytes) return 'unknown';
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+// Start everything
+loadFromManifest();
 </script>
 </body>
 </html>
