@@ -243,25 +243,25 @@
       </div>
     </section>
 
-    <!-- PROJECTS (from manifest) -->
+    <!-- PROJECTS (dynamic from GitHub) -->
     <section class="buffer" data-section="projects">
       <span class="filename-tag">~/suroj-plalunga/projects/ — <span id="repo-count">loading...</span></span>
       <h1>projects</h1>
-      <p class="dim" id="projects-subtitle">repositories from static manifest</p>
+      <p class="dim" id="projects-subtitle">repositories from GitHub (ETag cached)</p>
       <div class="proj-grid" id="proj-grid-container">
         <div class="loading-placeholder" id="loading-github">
-          <span class="mono">⟳ loading manifest…</span>
+          <span class="mono">⟳ loading repositories…</span>
         </div>
       </div>
     </section>
 
-    <!-- NOTES & PDFs (from manifest) -->
+    <!-- NOTES & PDFs (dynamic from GitHub) -->
     <section class="buffer" data-section="notes">
       <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">loading...</span></span>
       <h1>notes & proofs</h1>
       
       <h2>## compiled_pdfs</h2>
-      <p class="dim" id="pdf-subtitle">Loading from manifest…</p>
+      <p class="dim" id="pdf-subtitle">Loading PDFs from your repos…</p>
       
       <div class="zathura-viewer" id="zathura-viewer">
         <div class="zathura-bar">
@@ -273,7 +273,7 @@
 
       <div class="pdf-grid" id="pdf-list-container">
         <div class="loading-placeholder" id="loading-pdfs">
-          <span class="mono">⟳ loading PDFs from manifest…</span>
+          <span class="mono">⟳ loading PDFs…</span>
         </div>
       </div>
 
@@ -489,10 +489,8 @@ async function cachedFetchJSON(url) {
 
   if (cached) {
     try {
-      const { etag, data } = JSON.parse(cached);
+      const { etag } = JSON.parse(cached);
       if (etag) headers['If-None-Match'] = etag;
-      // Use cached data immediately if we have it, then update in background
-      // But here we wait for the network to respect the conditional request
     } catch (e) {
       localStorage.removeItem(cacheKey);
     }
@@ -501,9 +499,9 @@ async function cachedFetchJSON(url) {
   const response = await fetch(url, { headers });
 
   if (response.status === 304) {
-    // Not modified – use cached data (doesn't count toward rate limit)
-    const cachedData = JSON.parse(cached).data;
-    return cachedData;
+    // Use cached data (doesn't count toward rate limit)
+    const { data } = JSON.parse(cached);
+    return data;
   }
 
   if (!response.ok) {
@@ -549,12 +547,12 @@ async function loadAllContent(username) {
   const repoCount = document.getElementById('repo-count');
   const projSub = document.getElementById('projects-subtitle');
 
-  // Show loading indicators
+  // Show loading state
   pdfLoading.style.display = 'block';
   mdLoading.style.display = 'block';
   projLoading.style.display = 'block';
-  pdfCount.textContent = 'fetching...';
-  repoCount.textContent = 'fetching...';
+  pdfCount.textContent = 'loading...';
+  repoCount.textContent = 'loading...';
 
   try {
     const repos = await fetchAllRepos(username);
@@ -575,10 +573,12 @@ async function loadAllContent(username) {
       const card = document.createElement('div');
       card.className = 'proj-card';
       card.style.borderLeftColor = getLanguageColor(repo.language);
+      
       const langTag = repo.language ? `<span>${repo.language}</span>` : '';
       const desc = repo.description || 'No description provided.';
       const starBadge = repo.stargazers_count > 0 ? `<span>⭐ ${repo.stargazers_count}</span>` : '';
       const forkBadge = repo.forks_count > 0 ? `<span>🍴 ${repo.forks_count}</span>` : '';
+      
       card.innerHTML = `
         <a href="${repo.html_url}" target="_blank" class="repo-link">
           <div class="proj-head">
@@ -586,8 +586,13 @@ async function loadAllContent(username) {
             <span class="status">${new Date(repo.pushed_at).toLocaleDateString()}</span>
           </div>
           <p>${desc}</p>
-          <div class="meta-badges">${langTag}${starBadge}${forkBadge}</div>
-        </a>`;
+          <div class="meta-badges">
+            ${langTag}
+            ${starBadge}
+            ${forkBadge}
+          </div>
+        </a>
+      `;
       projGrid.appendChild(card);
     });
 
