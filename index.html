@@ -479,104 +479,158 @@ function closePdf() {
   }
 }
 
-/* ---------------- STATIC MANIFEST LOADER ---------------- */
-const GITHUB_USER = 'u9iver63';   // <-- change to your actual GitHub username
+/* ---------------- ETag‑cached fetch helper ---------------- */
+const CACHE_PREFIX = 'gh_etag_';
 
-async function loadFromManifest() {
-  const projGrid = document.getElementById('proj-grid-container');
-  const projLoading = document.getElementById('loading-github');
-  const repoCount = document.getElementById('repo-count');
-  const projSub = document.getElementById('projects-subtitle');
+async function cachedFetchJSON(url) {
+  const cacheKey = CACHE_PREFIX + url;
+  const cached = localStorage.getItem(cacheKey);
+  const headers = { Accept: 'application/vnd.github.v3+json' };
 
+  if (cached) {
+    try {
+      const { etag, data } = JSON.parse(cached);
+      if (etag) headers['If-None-Match'] = etag;
+      // Use cached data immediately if we have it, then update in background
+      // But here we wait for the network to respect the conditional request
+    } catch (e) {
+      localStorage.removeItem(cacheKey);
+    }
+  }
+
+  const response = await fetch(url, { headers });
+
+  if (response.status === 304) {
+    // Not modified – use cached data (doesn't count toward rate limit)
+    const cachedData = JSON.parse(cached).data;
+    return cachedData;
+  }
+
+  if (!response.ok) {
+    throw new Error(`GitHub API error: ${response.status}`);
+  }
+
+  const data = await response.json();
+  const etag = response.headers.get('ETag');
+  if (etag) {
+    localStorage.setItem(cacheKey, JSON.stringify({ etag, data }));
+  }
+  return data;
+}
+
+/* ---------------- GitHub helpers ---------------- */
+async function fetchAllRepos(username) {
+  const url = `https://api.github.com/users/${username}/repos?per_page=100`;
+  const repos = await cachedFetchJSON(url);
+  return repos.filter(r => !r.fork);
+}
+
+async function scanRepoTree(username, repoName, defaultBranch) {
+  const branch = defaultBranch || 'main';
+  const url = `https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`;
+  const data = await cachedFetchJSON(url);
+  return data.tree || [];
+}
+
+function buildRawUrl(username, repoName, branch, filePath) {
+  return `https://raw.githubusercontent.com/${username}/${repoName}/${branch}/${filePath}`;
+}
+
+/* ---------------- Load all content ---------------- */
+async function loadAllContent(username) {
   const pdfContainer = document.getElementById('pdf-list-container');
   const mdContainer = document.getElementById('notes-list');
   const pdfLoading = document.getElementById('loading-pdfs');
   const mdLoading = document.getElementById('loading-markdown');
   const pdfCount = document.getElementById('pdf-count');
   const pdfSub = document.getElementById('pdf-subtitle');
+  const projGrid = document.getElementById('proj-grid-container');
+  const projLoading = document.getElementById('loading-github');
+  const repoCount = document.getElementById('repo-count');
+  const projSub = document.getElementById('projects-subtitle');
+
+  // Show loading indicators
+  pdfLoading.style.display = 'block';
+  mdLoading.style.display = 'block';
+  projLoading.style.display = 'block';
+  pdfCount.textContent = 'fetching...';
+  repoCount.textContent = 'fetching...';
 
   try {
-    const res = await fetch('manifest.json');
-    if (!res.ok) throw new Error('Manifest not found');
-    const repos = await res.json();
+    const repos = await fetchAllRepos(username);
+    if (repos.length === 0) {
+      pdfLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
+      mdLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
+      projLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
+      return;
+    }
 
-    // --- Projects ---
+    // Render projects
     projLoading.remove();
     const displayedRepos = repos.slice(0, 12);
     repoCount.textContent = displayedRepos.length + ' repos';
-    projSub.textContent = 'repositories from static manifest — sorted by recent activity';
+    projSub.textContent = 'live from GitHub (ETag cached)';
 
     displayedRepos.forEach(repo => {
       const card = document.createElement('div');
       card.className = 'proj-card';
       card.style.borderLeftColor = getLanguageColor(repo.language);
-      
       const langTag = repo.language ? `<span>${repo.language}</span>` : '';
       const desc = repo.description || 'No description provided.';
       const starBadge = repo.stargazers_count > 0 ? `<span>⭐ ${repo.stargazers_count}</span>` : '';
       const forkBadge = repo.forks_count > 0 ? `<span>🍴 ${repo.forks_count}</span>` : '';
-      
       card.innerHTML = `
         <a href="${repo.html_url}" target="_blank" class="repo-link">
           <div class="proj-head">
             <h3>${repo.name}</h3>
-            <span class="status">${new Date(repo.pushedAt).toLocaleDateString()}</span>
+            <span class="status">${new Date(repo.pushed_at).toLocaleDateString()}</span>
           </div>
           <p>${desc}</p>
-          <div class="meta-badges">
-            ${langTag}
-            ${starBadge}
-            ${forkBadge}
-          </div>
-        </a>
-      `;
+          <div class="meta-badges">${langTag}${starBadge}${forkBadge}</div>
+        </a>`;
       projGrid.appendChild(card);
     });
 
-    // --- PDFs and Markdown files from all repos ---
+    // Collect all PDFs & MDs
     let allPdfs = [];
     let allMds = [];
-    repos.forEach(repo => {
-      const branch = repo.defaultBranch || 'main';
-      (repo.pdfs || []).forEach(pdf => {
-        allPdfs.push({
-          name: pdf.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`,
-          size: pdf.size,
-          repo: repo.name
-        });
-      });
-      (repo.mds || []).forEach(md => {
-        allMds.push({
-          name: md.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`,
-          repo: repo.name
-        });
-      });
-    });
+    for (const repo of repos) {
+      const branch = repo.default_branch || 'main';
+      try {
+        const tree = await scanRepoTree(username, repo.name, branch);
+        for (const item of tree) {
+          if (item.type !== 'blob') continue;
+          const url = buildRawUrl(username, repo.name, branch, item.path);
+          if (item.path.toLowerCase().endsWith('.pdf')) {
+            allPdfs.push({ name: item.path, url, size: item.size, repo: repo.name });
+          } else if (item.path.toLowerCase().endsWith('.md')) {
+            allMds.push({ name: item.path, url, repo: repo.name });
+          }
+        }
+      } catch (e) { continue; }
+    }
 
-    // --- PDFs ---
+    // Render PDFs
     pdfLoading.remove();
     if (allPdfs.length === 0) {
       pdfContainer.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
       pdfCount.textContent = '0';
-      pdfSub.textContent = 'No PDFs found across your repos.';
+      pdfSub.textContent = 'No PDFs found across repos';
     } else {
       pdfCount.textContent = allPdfs.length + ' PDFs';
-      pdfSub.textContent = 'Scanned repos — click to view in Zathura';
+      pdfSub.textContent = 'Click to view in Zathura';
       allPdfs.forEach(pdf => {
-        const pdfItem = document.createElement('div');
-        pdfItem.className = 'pdf-item';
-        pdfItem.innerHTML = `
+        const div = document.createElement('div');
+        div.className = 'pdf-item';
+        div.innerHTML = `
           <span>📄 <span style="color:var(--yellow);">${pdf.repo}/</span>${pdf.name}</span>
-          <span class="size">${formatSize(pdf.size)}</span>
-        `;
-        pdfItem.addEventListener('click', () => openPdf(pdf.url, pdf.name));
-        pdfContainer.appendChild(pdfItem);
+          <span class="size">${formatSize(pdf.size)}</span>`;
+        div.addEventListener('click', () => openPdf(pdf.url, pdf.name));
+        pdfContainer.appendChild(div);
       });
     }
 
-    // --- Markdown notes ---
+    // Render Markdown notes
     mdLoading.remove();
     if (allMds.length === 0) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
@@ -591,8 +645,7 @@ async function loadFromManifest() {
             <span class="date mono">${md.repo}</span>
             <span class="arrow">›</span>
           </button>
-          <div class="note-body"><div class="note-body-inner">Loading...</div></div>
-        `;
+          <div class="note-body"><div class="note-body-inner">Loading...</div></div>`;
         mdContainer.appendChild(noteDiv);
         const headBtn = noteDiv.querySelector('.note-head');
         const bodyInner = noteDiv.querySelector('.note-body-inner');
@@ -614,28 +667,19 @@ async function loadFromManifest() {
 
   } catch (error) {
     console.warn(error);
-    projLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
-    pdfLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
-    mdLoading.innerHTML = '<span class="mono">⚠️ Could not load manifest.</span>';
-    repoCount.textContent = 'offline';
-    projSub.textContent = 'could not reach manifest';
-    showToast('⚠️ Could not load content manifest');
+    pdfLoading.innerHTML = '<span class="mono">⚠️ Could not load GitHub data. Try again later.</span>';
+    mdLoading.innerHTML = '<span class="mono">⚠️ Could not load GitHub data. Try again later.</span>';
+    projLoading.innerHTML = '<span class="mono">⚠️ Could not load GitHub data. Try again later.</span>';
+    showToast('⚠️ GitHub data unavailable');
   }
 }
 
 function getLanguageColor(lang) {
   const colors = {
-    'JavaScript': '#f1e05a',
-    'Python': '#3572A5',
-    'TypeScript': '#3178c6',
-    'Rust': '#dea584',
-    'C++': '#f34b7d',
-    'Haskell': '#5e5086',
-    'Julia': '#a270ba',
-    'Typst': '#239DAD',
-    'Lean': '#17980E',
-    'Shell': '#89e051',
-    'Jupyter Notebook': '#DA5B0B',
+    'JavaScript': '#f1e05a', 'Python': '#3572A5', 'TypeScript': '#3178c6',
+    'Rust': '#dea584', 'C++': '#f34b7d', 'Haskell': '#5e5086',
+    'Julia': '#a270ba', 'Typst': '#239DAD', 'Lean': '#17980E',
+    'Shell': '#89e051', 'Jupyter Notebook': '#DA5B0B'
   };
   return colors[lang] || 'var(--blue)';
 }
@@ -647,8 +691,9 @@ function formatSize(bytes) {
   return (bytes / 1048576).toFixed(1) + ' MB';
 }
 
-// Start everything
-loadFromManifest();
+// Start – change this to your GitHub username
+const GITHUB_USER = 'u9iver63';
+loadAllContent(GITHUB_USER);
 </script>
 </body>
 </html>
