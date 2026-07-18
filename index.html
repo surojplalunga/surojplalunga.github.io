@@ -29,7 +29,7 @@
 }
 </script>
 
-<!-- highlight.js -->
+<!-- Libraries: highlight.js, marked, KaTeX -->
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/tokyo-night-dark.min.css">
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/cpp.min.js"></script>
@@ -38,11 +38,13 @@
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/rust.min.js"></script>
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/lean.min.js"></script>
 
-<!-- marked for Markdown rendering -->
 <script defer src="https://cdnjs.cloudflare.com/ajax/libs/marked/14.1.0/marked.min.js"></script>
 
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.css">
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/katex.min.js"></script>
+<script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.11/dist/contrib/auto-render.min.js"></script>
+
 <style>
-  /* ---------- identical CSS as before, unchanged ---------- */
   :root {
     --bg: #1A1B26;
     --bg2: #16161E;
@@ -155,7 +157,8 @@
   .note-head .date { color: var(--text-dimmer); font-size: 0.76rem; margin-right: auto; margin-left: 14px; }
   .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
   .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
-  .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; }
+  .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
+  .note-body-inner img { max-width: 100%; border-radius: 4px; margin: 8px 0; }
 
   .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
   .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -187,7 +190,6 @@
   .toast { position: fixed; bottom: 52px; right: 20px; background: var(--panel); border: 1px solid var(--line); padding: 9px 16px; border-radius: 4px; font-size: 0.8rem; color: var(--text); opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 99; }
   .toast.show { opacity: 1; transform: translateY(0); }
 
-  /* Floating panels (help, search results) */
   .floating-panel {
     position: fixed; top: 50%; left: 50%; transform: translate(-50%,-50%);
     background: var(--bg2); border: 2px solid var(--blue); border-radius: 6px;
@@ -274,12 +276,15 @@
     <button class="tree-item" data-section="notes" data-mode="VISUAL" data-color="#BB9AF7" role="tab" aria-selected="false">
       <span class="icon">▾</span> notes/
     </button>
+    <button class="tree-item" data-section="now" data-mode="INSERT" data-color="#7DCFFF" role="tab" aria-selected="false">
+      <span class="icon">▸</span> now.md
+    </button>
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false">
       <span class="icon">▸</span> contact.txt
     </button>
 
     <div class="sidebar-hint">
-      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>5</kbd> navigate</div>
+      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>6</kbd> navigate</div>
       <div><kbd>SPC</kbd> <kbd>e</kbd> toggle explorer</div>
       <div><kbd>:</kbd> command mode</div>
     </div>
@@ -376,6 +381,16 @@
         </div>
       </section>
 
+      <!-- NOW (blog) -->
+      <section class="buffer" data-section="now" role="tabpanel">
+        <span class="filename-tag">~/suroj-plalunga/now.md</span>
+        <h1>now</h1>
+        <p class="dim">What I’m up to — updated whenever.</p>
+        <div class="lines" id="now-content">
+          <p class="loading-placeholder">⟳ loading now.md…</p>
+        </div>
+      </section>
+
       <!-- CONTACT -->
       <section class="buffer" data-section="contact" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
@@ -397,7 +412,7 @@
           <span class="dim">→ Beauty lies in the eyes of beholder.</span>
         </div>
         <h2>## send a message</h2>
-        <form class="contact-form" action="https://formspree.io/f/lsuroj61@gmail.com" method="POST">
+        <form class="contact-form" action="https://formspree.io/f/YOUR_FORM_ID" method="POST">
           <input type="text" name="name" placeholder="Your name" required>
           <input type="email" name="email" placeholder="Your email" required>
           <textarea name="message" rows="5" placeholder="Your message..."></textarea>
@@ -410,7 +425,7 @@
 
 <div class="cmdbar" id="cmdbar" role="dialog" aria-label="command input">
   <span class="colon">:</span>
-  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · contact · help" aria-label="command">
+  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · contact · help" aria-label="command">
   <span class="cmd-hint">enter to run · esc to cancel</span>
 </div>
 
@@ -421,10 +436,10 @@
   <h3>📖 Help</h3>
   <ul>
     <li><span class="key">j</span> / <span class="key">k</span> – navigate sections</li>
-    <li><span class="key">1</span>–<span class="key">5</span> – jump to section</li>
+    <li><span class="key">1</span>–<span class="key">6</span> – jump to section</li>
     <li><span class="key">SPC</span> <span class="key">e</span> – toggle file tree</li>
     <li><span class="key">:</span> – open command bar</li>
-    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:contact</span></li>
+    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:contact</span></li>
     <li><span class="key">:help</span> – this window</li>
     <li><span class="key">:grep &lt;query&gt;</span> – search across projects, PDFs, notes</li>
     <li><span class="key">:q</span> / <span class="key">:wq</span> – you know what happens :)</li>
@@ -438,11 +453,12 @@
 </div>
 
 <script>
-/* ---------------- Constants ---------------- */
+/* ---------------- Constants (change these) ---------------- */
 const GITHUB_USER = 'u9iver63';
-const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`;
+const RESUME_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/resume/main/resume.pdf`; // adjust path
+const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/now.md`; // your "now" blog file
 
-/* ---------------- Markdown & highlight.js configuration ---------------- */
+/* ---------------- Markdown, highlight.js, KaTeX config ---------------- */
 if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
   marked.setOptions({
     highlight: function(code, lang) {
@@ -453,6 +469,26 @@ if (typeof marked !== 'undefined' && typeof hljs !== 'undefined') {
     },
     breaks: true
   });
+}
+
+function renderMarkdown(rawText, targetElement) {
+  if (typeof marked === 'undefined') {
+    targetElement.textContent = rawText;
+    return;
+  }
+  targetElement.innerHTML = marked.parse(rawText);
+  // KaTeX
+  if (typeof renderMathInElement !== 'undefined') {
+    try {
+      renderMathInElement(targetElement, {
+        delimiters: [
+          {left: '$$', right: '$$', display: true},
+          {left: '$', right: '$', display: false}
+        ],
+        throwOnError: false
+      });
+    } catch(e) {}
+  }
 }
 
 /* ---------------- clock ---------------- */
@@ -476,13 +512,13 @@ function toggleSidebar() {
 btnToggleSidebar.addEventListener('click', toggleSidebar);
 backdrop.addEventListener('click', closeSidebar);
 
-/* ---------------- bufferline & navigation ---------------- */
+/* ---------------- bufferline & navigation (6 items) ---------------- */
 const treeItems = Array.from(document.querySelectorAll('.tree-item'));
 const buffers = Array.from(document.querySelectorAll('.buffer'));
 const modePill = document.getElementById('mode-pill');
 const statusFile = document.getElementById('status-file');
 const bufferline = document.getElementById('bufferline');
-const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', contact:'contact.txt' };
+const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', now:'now.md', contact:'contact.txt' };
 let currentIndex = 0;
 
 function renderBufferline() {
@@ -535,7 +571,7 @@ document.addEventListener('keydown', (e) => {
   }
   if(e.key === 'j'){ e.preventDefault(); currentIndex = Math.min(currentIndex+1, treeItems.length-1); goTo(treeItems[currentIndex].dataset.section); }
   else if(e.key === 'k'){ e.preventDefault(); currentIndex = Math.max(currentIndex-1, 0); goTo(treeItems[currentIndex].dataset.section); }
-  else if(['1','2','3','4','5'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
+  else if(['1','2','3','4','5','6'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
   else if(e.key === ':'){ e.preventDefault(); openCmd(); }
 });
 
@@ -550,12 +586,12 @@ cmdInput.addEventListener('keydown', (e) => {
   if(e.key === 'Enter'){
     const raw = cmdInput.value.trim();
     const cmd = raw.toLowerCase();
-    if(['about','stack','projects','notes','contact'].includes(cmd)){ goTo(cmd); closeCmd(); }
+    if(['about','stack','projects','notes','now','contact'].includes(cmd)){ goTo(cmd); closeCmd(); }
     else if(cmd === 'q' || cmd === 'q!' || cmd === 'wq'){ showToast("can't quit real life that easily :)"); closeCmd(); }
     else if(cmd === 'e' || cmd === 'explore' || cmd === 'neotree'){ toggleSidebar(); closeCmd(); }
     else if(cmd === 'help'){ openHelp(); closeCmd(); }
     else if(cmd.startsWith('grep ')){ performSearch(raw.slice(5).trim()); closeCmd(); }
-    else if(cmd === ''){ showToast('commands: about · stack · projects · notes · contact · help'); closeCmd(); }
+    else if(cmd === ''){ showToast('commands: about · stack · projects · notes · now · contact · help'); closeCmd(); }
     else { showToast('E492: not an editor command: ' + cmd); closeCmd(); }
   }
 });
@@ -641,6 +677,23 @@ function performSearch(query) {
 function closeSearch() { searchPanel.classList.remove('show'); }
 document.addEventListener('click', (e) => { if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch(); });
 document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && searchPanel.classList.contains('show')) closeSearch(); });
+
+/* ---------------- LOAD NOW.MD ---------------- */
+async function loadNow() {
+  const container = document.getElementById('now-content');
+  try {
+    const res = await fetch(NOW_MD_URL);
+    if (!res.ok) throw new Error('Failed to fetch now.md');
+    const rawText = await res.text();
+    container.innerHTML = '';
+    const div = document.createElement('div');
+    div.style.padding = '0';
+    renderMarkdown(rawText, div);
+    container.appendChild(div);
+  } catch (e) {
+    container.innerHTML = '<p class="dim">Could not load now.md.</p>';
+  }
+}
 
 /* ---------------- STATIC MANIFEST LOADER ---------------- */
 async function loadContent() {
@@ -728,8 +781,7 @@ async function loadContent() {
               const res = await fetch(md.url);
               if (!res.ok) throw new Error('Failed to fetch');
               const rawText = await res.text();
-              // Use marked to parse Markdown → HTML
-              bodyInner.innerHTML = marked.parse(rawText);
+              renderMarkdown(rawText, bodyInner);
             } catch (err) {
               bodyInner.textContent = 'Error loading content.';
             }
@@ -751,7 +803,9 @@ async function loadContent() {
 function getLanguageColor(lang) { const colors = { 'JavaScript':'#f1e05a','Python':'#3572A5','TypeScript':'#3178c6','Rust':'#dea584','C++':'#f34b7d','Haskell':'#5e5086','Julia':'#a270ba','Typst':'#239DAD','Lean':'#17980E','Shell':'#89e051','Jupyter Notebook':'#DA5B0B' }; return colors[lang] || 'var(--blue)'; }
 function formatSize(bytes) { if (!bytes) return 'unknown'; if (bytes < 1024) return bytes + ' B'; if (bytes < 1048576) return (bytes/1024).toFixed(1) + ' KB'; return (bytes/1048576).toFixed(1) + ' MB'; }
 
+/* ---------------- Kick off everything ---------------- */
 loadContent();
+loadNow();
 </script>
 
 <noscript>
