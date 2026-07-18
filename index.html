@@ -1,0 +1,762 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>~/suroj-plalunga</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700&family=Newsreader:ital,wght@1,400;1,500&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #1A1B26;
+    --bg2: #16161E;
+    --panel: #1E202D;
+    --line: #292E42;
+    --text: #C0CAF5;
+    --text-dim: #565F89;
+    --text-dimmer: #414868;
+    --blue: #7AA2F7;
+    --green: #9ECE6A;
+    --magenta: #BB9AF7;
+    --yellow: #E0AF68;
+    --red: #F7768E;
+    --cyan: #7DCFFF;
+  }
+  * { box-sizing: border-box; }
+  html, body { height: 100%; }
+  body {
+    margin: 0; 
+    background: var(--bg); 
+    color: var(--text);
+    font-family: 'Inter', sans-serif;
+    display: flex; 
+    flex-direction: column;
+    -webkit-font-smoothing: antialiased;
+  }
+  .mono { font-family: 'JetBrains Mono', monospace; }
+  ::selection { background: var(--blue); color: var(--bg2); }
+  a { color: var(--cyan); text-decoration: none; border-bottom: 1px dotted var(--text-dimmer); }
+  a:hover { color: var(--text); border-bottom-color: var(--text); }
+
+  button { font-family: inherit; cursor: pointer; }
+  *:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+  @media (prefers-reduced-motion: reduce) {
+    * { animation-duration: 0.001ms !important; transition-duration: 0.001ms !important; }
+  }
+
+  .statusline { height: 34px; flex-shrink: 0; display: flex; align-items: center; background: var(--bg2); border-bottom: 1px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: 0.74rem; padding: 0 14px; gap: 14px; color: var(--text-dim); }
+  .mode-pill { padding: 2px 10px; border-radius: 2px; font-weight: 700; letter-spacing: 0.04em; color: var(--bg2); transition: background-color .2s; }
+  .status-btn { background: none; border: none; color: var(--text-dim); cursor: pointer; font-family: 'JetBrains Mono', monospace; padding: 2px 6px; border-radius: 2px; }
+  .status-btn:hover { color: var(--text); background: var(--panel); }
+  .statusline .sep { color: var(--text-dimmer); }
+  .statusline .spacer { flex: 1; }
+  .statusline .clock { color: var(--text-dim); }
+
+  .workspace { flex: 1; display: flex; min-height: 0; }
+  .sidebar { width: 238px; flex-shrink: 0; background: var(--bg2); border-right: 1px solid var(--line); padding: 18px 0; overflow-y: auto; transition: width 0.15s; }
+  .sidebar.collapsed { display: none; }
+  .sidebar .path { padding: 0 18px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dimmer); }
+  .tree-item { display: flex; align-items: center; gap: 8px; width: 100%; text-align: left; padding: 7px 18px; background: none; border: none; color: var(--text-dim); font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; cursor: pointer; transition: background-color .12s, color .12s; border-left: 2px solid transparent; }
+  .tree-item .icon { width: 14px; text-align: center; flex-shrink: 0; }
+  .tree-item:hover { background: var(--panel); color: var(--text); }
+  .tree-item.active { background: var(--panel); color: var(--text); }
+  .sidebar-hint { margin-top: 20px; padding: 12px 18px; border-top: 1px solid var(--line); font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-dimmer); line-height: 1.9; }
+  .sidebar-hint kbd { background: var(--panel); border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px; color: var(--text-dim); }
+
+  .main { flex: 1; overflow-y: auto; position: relative; }
+  .buffer { display: none; padding: 48px 56px 64px; max-width: 760px; }
+  .buffer.active { display: block; }
+  .buffer h1 { font-family: 'Newsreader', serif; font-style: italic; font-weight: 500; font-size: 2.6rem; margin: 0 0 6px; color: var(--text); }
+  .buffer .filename-tag { font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dimmer); margin-bottom: 28px; display: block; }
+  .buffer h2 { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--yellow); margin: 32px 0 14px; font-weight: 700; }
+  .buffer h2:first-of-type { margin-top: 8px; }
+  .buffer p { margin: 0 0 14px; color: var(--text); font-size: 0.98rem; line-height: 1.75; }
+  .buffer p.dim { color: var(--text-dim); }
+
+  .lines { counter-reset: line; border-left: 1px solid var(--line); margin-left: 2px; }
+  .line { counter-increment: line; position: relative; padding-left: 44px; margin-bottom: 10px; font-size: 0.95rem; line-height: 1.7; color: var(--text); }
+  .line::before { content: counter(line); position: absolute; left: -2px; top: 0; width: 36px; text-align: right; transform: translateX(-100%); margin-left: -6px; font-family: 'JetBrains Mono', monospace; font-size: 0.72rem; color: var(--text-dimmer); padding-right: 12px; }
+  .line .kw { color: var(--magenta); }
+  .line .str { color: var(--green); }
+  .line .cm { color: var(--text-dimmer); font-style: italic; }
+
+  .toml-block { font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+  .toml-section { color: var(--blue); margin: 22px 0 10px; }
+  .toml-row { display: flex; gap: 10px; padding: 3px 0; }
+  .toml-key { color: var(--cyan); width: 170px; flex-shrink: 0; }
+  .toml-eq { color: var(--text-dimmer); }
+  .toml-val { color: var(--green); }
+
+  .proj-grid { display: grid; gap: 14px; margin-top: 6px; }
+  .proj-card { background: var(--panel); border: 1px solid var(--line); border-radius: 4px; padding: 18px 20px; border-left: 3px solid var(--green); transition: border-color 0.2s, background 0.2s; }
+  .proj-card:hover { border-left-color: var(--blue); background: #252836; }
+  .proj-card .proj-head { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; flex-wrap: wrap; }
+  .proj-card h3 { font-family: 'JetBrains Mono', monospace; font-size: 0.95rem; color: var(--text); margin: 0; font-weight: 700; }
+  .proj-card .status { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; color: var(--text-dimmer); white-space: nowrap; }
+  .proj-card p { margin: 10px 0 0; font-size: 0.88rem; color: var(--text-dim); }
+  .proj-card .tags, .proj-card .meta-badges { margin-top: 10px; display: flex; gap: 6px; flex-wrap: wrap; }
+  .proj-card .tags span, .proj-card .meta-badges span { font-family: 'JetBrains Mono', monospace; font-size: 0.68rem; padding: 2px 7px; border: 1px solid var(--line); border-radius: 2px; color: var(--text-dimmer); }
+  .proj-card a.repo-link { text-decoration: none; border-bottom: none; color: inherit; display: block; }
+  .proj-card a.repo-link:hover { color: inherit; }
+  .loading-placeholder { color: var(--text-dimmer); font-family: 'JetBrains Mono', monospace; text-align: center; padding: 20px; border: 1px dashed var(--line); border-radius: 4px; margin: 20px 0; }
+
+  .note-item { border-bottom: 1px solid var(--line); }
+  .note-head { width: 100%; background: none; border: none; text-align: left; padding: 14px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; }
+  .note-head .arrow { color: var(--magenta); transition: transform .18s; flex-shrink: 0; margin-left: 12px; }
+  .note-item.open .arrow { transform: rotate(90deg); }
+  .note-head .date { color: var(--text-dimmer); font-size: 0.76rem; margin-right: auto; margin-left: 14px; }
+  .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
+  .note-item.open .note-body { max-height: 300px; overflow-y: auto; }
+  .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; white-space: pre-wrap; font-family: 'JetBrains Mono', monospace; }
+
+  .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
+  .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-family: 'JetBrains Mono', monospace; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
+  .pdf-item:hover { border-color: var(--blue); background: var(--panel); }
+  .pdf-item .size { color: var(--text-dimmer); font-size: 0.7rem; }
+
+  .zathura-viewer { display: none; flex-direction: column; height: 600px; border: 1px solid var(--line); border-radius: 4px; overflow: hidden; margin-bottom: 32px; }
+  .zathura-viewer.active { display: flex; }
+  .zathura-bar { background: var(--bg2); padding: 8px 12px; font-family: 'JetBrains Mono', monospace; font-size: 0.75rem; color: var(--text-dim); display: flex; justify-content: space-between; border-bottom: 1px solid var(--line); align-items: center; }
+  .zathura-bar button { background: var(--panel); border: 1px solid var(--line); color: var(--red); border-radius: 3px; padding: 2px 8px; cursor: pointer; font-family: inherit; transition: .2s; }
+  .zathura-bar button:hover { background: var(--red); color: var(--bg2); }
+  iframe.pdf-frame { flex: 1; width: 100%; border: none; background: #ececec; }
+
+  .contact-block { font-family: 'JetBrains Mono', monospace; font-size: 0.92rem; }
+  .contact-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; border-bottom: 1px dashed var(--line); }
+  .contact-row .k { color: var(--red); width: 80px; flex-shrink: 0; }
+  .contact-row .v { color: var(--text); }
+  .copy-btn { background: none; border: 1px solid var(--line); color: var(--text-dimmer); border-radius: 3px; padding: 2px 8px; font-size: 0.68rem; cursor: pointer; margin-left: auto; font-family: 'JetBrains Mono', monospace; }
+  .copy-btn:hover { color: var(--text); border-color: var(--text-dim); }
+  .status-echo { margin-top: 22px; color: var(--text-dim); }
+  .status-echo .prompt { color: var(--green); }
+
+  .cmdbar { position: fixed; left: 0; right: 0; bottom: 0; background: var(--bg2); border-top: 1px solid var(--line); display: none; align-items: center; padding: 8px 16px; font-family: 'JetBrains Mono', monospace; font-size: 0.88rem; z-index: 100; }
+  .cmdbar.show { display: flex; }
+  .cmdbar .colon { color: var(--yellow); margin-right: 4px; }
+  .cmdbar input { flex: 1; background: none; border: none; color: var(--text); font-family: 'JetBrains Mono', monospace; font-size: 0.9rem; }
+  .cmdbar input:focus { outline: none; }
+  .cmdbar .cmd-hint { color: var(--text-dimmer); font-size: 0.72rem; }
+
+  .toast { position: fixed; bottom: 52px; right: 20px; background: var(--panel); border: 1px solid var(--line); padding: 9px 16px; border-radius: 4px; font-family: 'JetBrains Mono', monospace; font-size: 0.8rem; color: var(--text); opacity: 0; transform: translateY(6px); transition: all .2s; pointer-events: none; z-index: 99; }
+  .toast.show { opacity: 1; transform: translateY(0); }
+
+  @media (max-width: 760px) {
+    .sidebar { width: 170px; position: absolute; height: 100%; z-index: 50; }
+    .buffer { padding: 32px 22px 60px; }
+    .buffer h1 { font-size: 2rem; }
+    .toml-key { width: 120px; }
+    .zathura-viewer { height: 400px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="statusline">
+  <span class="mono" id="mode-pill" style="color:#1A1B26;background:#7AA2F7;padding:2px 10px;border-radius:2px;font-weight:700;">NORMAL</span>
+  <span class="sep">│</span>
+  <button id="btn-toggle-sidebar" class="status-btn" title="Toggle Sidebar (Space + e)">[☰]</button>
+  <span class="sep">│</span>
+  <span id="status-file">about.md</span>
+  <span class="sep">│</span>
+  <span>tmux: portfolio</span>
+  <div class="spacer"></div>
+  <span>press <kbd class="mono" style="background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">:</kbd> for commands</span>
+  <span class="sep">│</span>
+  <span class="clock" id="clock">00:00:00</span>
+</div>
+
+<div class="workspace">
+  <aside class="sidebar" id="sidebar">
+    <div class="path">~/suroj-plalunga</div>
+    <button class="tree-item active" data-section="about" data-mode="NORMAL" data-color="#7AA2F7">
+      <span class="icon">▸</span> about.md
+    </button>
+    <button class="tree-item" data-section="stack" data-mode="COMMAND" data-color="#E0AF68">
+      <span class="icon">▸</span> stack.toml
+    </button>
+    <button class="tree-item" data-section="projects" data-mode="INSERT" data-color="#9ECE6A">
+      <span class="icon">▾</span> projects/
+    </button>
+    <button class="tree-item" data-section="notes" data-mode="VISUAL" data-color="#BB9AF7">
+      <span class="icon">▾</span> notes/
+    </button>
+    <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E">
+      <span class="icon">▸</span> contact.txt
+    </button>
+
+    <div class="sidebar-hint">
+      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>5</kbd> navigate</div>
+      <div><kbd>SPC</kbd> <kbd>e</kbd> toggle explorer</div>
+      <div><kbd>:</kbd> command mode</div>
+    </div>
+  </aside>
+
+  <main class="main">
+    <!-- ABOUT -->
+    <section class="buffer active" data-section="about">
+      <span class="filename-tag">~/suroj-plalunga/about.md — 1 buffer</span>
+      <h1>Suroj Plalunga</h1>
+      <p class="dim">BSc Mathematics · Tribhuvan University, Nepal</p>
+
+      <h2>## who</h2>
+      <div class="lines">
+        <p class="line">I split my time between proofs and terminals — Graph theory, real analysis and topology on one side of the desk, a heavily customized <span class="kw">Arch Linux</span> + <span class="kw">Hyprland</span> setup on the other.</p>
+        <p class="line"></p>
+        <p class="line">My daily driver is <span class="kw">Neovim</span> (Native Package Manger Vim.Pack ) with <span class="kw">tinymist</span> for Typst, <span class="kw">Zathura</span> for bidirectionally-synced PDF preview, and <span class="kw">tmux</span> holding it all together.</p>
+        <p class="line"><span class="cm">// currently reading Discrete math, Real Analysis and Point set Topology - July 2026.</span></p>
+      </div>
+
+      <h2>## interested in</h2>
+      <p>Algebraic geometry, formal methods (Lean 4), symbolic computation, and the design of Mathematical tools.</p>
+    </section>
+
+    <!-- STACK -->
+    <section class="buffer" data-section="stack">
+      <span class="filename-tag">~/suroj-plalunga/stack.toml</span>
+      <h1>stack.toml</h1>
+      <p class="dim">the tools I actually reach for</p>
+
+      <div class="toml-block">
+        <div class="toml-section">[languages]</div>
+        <div class="toml-row"><span class="toml-key">exploring</span><span class="toml-eq">=</span><span class="toml-val">["C++", "Julia", "Haskell"]</span></div>
+
+        <div class="toml-section">[editor]</div>
+        <div class="toml-row"><span class="toml-key">core</span><span class="toml-eq">=</span><span class="toml-val">"Neovim"</span></div>
+        <div class="toml-row"><span class="toml-key">typst_lsp</span><span class="toml-eq">=</span><span class="toml-val">"tinymist"</span></div>
+        <div class="toml-row"><span class="toml-key">completion</span><span class="toml-eq">=</span><span class="toml-val">"blink.cmp"</span></div>
+        <div class="toml-row"><span class="toml-key">snippets</span><span class="toml-eq">=</span><span class="toml-val">"LuaSnip"</span></div>
+        <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"Telescope"</span></div> 
+        <div class="toml-row"><span class="toml-key">Interactive Editor</span><span class="toml-eq">=</span><span class="toml-val">"Molten.nvim"</span></div> 
+
+        <div class="toml-section">[system]</div>
+        <div class="toml-row"><span class="toml-key">os</span><span class="toml-eq">=</span><span class="toml-val">"Arch Linux"</span></div>
+        <div class="toml-row"><span class="toml-key">compositor</span><span class="toml-eq">=</span><span class="toml-val">"Hyprland"</span></div>
+        <div class="toml-row"><span class="toml-key">portal</span><span class="toml-eq">=</span><span class="toml-val">"xdg-desktop-portal-hyprland"</span></div>
+        <div class="toml-row"><span class="toml-key">multiplexer</span><span class="toml-eq">=</span><span class="toml-val">"tmux"</span></div>
+
+        <div class="toml-section">[cli]</div>
+        <div class="toml-row"><span class="toml-key">search</span><span class="toml-eq">=</span><span class="toml-val">["fzf", "ripgrep"]</span></div>
+        <div class="toml-row"><span class="toml-key">navigation</span><span class="toml-eq">=</span><span class="toml-val">"zoxide"</span></div>
+        <div class="toml-row"><span class="toml-key">debug</span><span class="toml-eq">=</span><span class="toml-val">["gdb", "lldb"]</span></div>
+        <div class="toml-row"><span class="toml-key">pdf</span><span class="toml-eq">=</span><span class="toml-val">"Zathura"</span></div>
+      </div>
+    </section>
+
+    <!-- PROJECTS (dynamic GitHub content) -->
+    <section class="buffer" data-section="projects">
+      <span class="filename-tag">~/suroj-plalunga/projects/ — <span id="repo-count">fetching...</span></span>
+      <h1>projects</h1>
+      <p class="dim" id="projects-subtitle">repositories from GitHub — sorted by recent activity</p>
+      <div class="proj-grid" id="proj-grid-container">
+        <div class="loading-placeholder" id="loading-github">
+          <span class="mono">⟳ fetching github.com/u9iver63/repos...</span>
+        </div>
+      </div>
+      <div id="static-projects-fallback" style="display:none;">
+        <h2 style="margin-top:20px;">## offline_fallback</h2>
+        <p class="dim">Static snapshot — live data unavailable.</p>
+        <div class="proj-grid">
+          <div class="proj-card" style="border-left-color:var(--green);">
+            <div class="proj-head"><h3>typst-package-arch</h3><span class="status">in progress</span></div>
+            <p>Architecting a large, pure-Typst package with a layered core/draw/lib split.</p>
+            <div class="tags"><span>Typst</span><span>package design</span></div>
+          </div>
+          <div class="proj-card" style="border-left-color:var(--cyan);">
+            <div class="proj-head"><h3>symbolic-calc-wasm</h3><span class="status">prototyping</span></div>
+            <p>Symbolic differentiation plugin for Typst: Rust → WASM.</p>
+            <div class="tags"><span>Rust</span><span>WASM</span><span>Typst</span></div>
+          </div>
+          <div class="proj-card" style="border-left-color:var(--magenta);">
+            <div class="proj-head"><h3>ml-for-math</h3><span class="status">learning path</span></div>
+            <p>PyTorch → symbolic regression with PySR → neural theorem proving.</p>
+            <div class="tags"><span>PyTorch</span><span>PySR</span></div>
+          </div>
+          <div class="proj-card" style="border-left-color:var(--yellow);">
+            <div class="proj-head"><h3>lean-formalizations</h3><span class="status">exploring</span></div>
+            <p>Lean 4 formalizations against Mathlib4 + DeepSeek-Prover-V2 pipeline.</p>
+            <div class="tags"><span>Lean 4</span><span>Mathlib4</span></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- NOTES & PDFs (dynamic from all GitHub repos) -->
+    <section class="buffer" data-section="notes">
+      <span class="filename-tag">~/suroj-plalunga/notes/ — <span id="pdf-count">fetching...</span></span>
+      <h1>notes & proofs</h1>
+      
+      <h2>## compiled_pdfs</h2>
+      <p class="dim" id="pdf-subtitle">Scanning all your public repos for PDFs…</p>
+      
+      <div class="zathura-viewer" id="zathura-viewer">
+        <div class="zathura-bar">
+          <span>[zathura] <span id="zathura-title" class="mono" style="color:var(--cyan)"></span></span>
+          <button onclick="closePdf()">[q] quit</button>
+        </div>
+        <iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen></iframe>
+      </div>
+
+      <div class="pdf-grid" id="pdf-list-container">
+        <div class="loading-placeholder" id="loading-pdfs">
+          <span class="mono">⟳ fetching PDFs from all repositories…</span>
+        </div>
+      </div>
+
+      <h2>## raw_markdown</h2>
+      <p class="dim">Markdown notes from your repositories — click to expand.</p>
+      <div id="notes-list">
+        <div class="loading-placeholder" id="loading-markdown">
+          <span class="mono">⟳ fetching Markdown files…</span>
+        </div>
+      </div>
+    </section>
+
+    <!-- CONTACT -->
+    <section class="buffer" data-section="contact">
+      <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
+      <h1>contact</h1>
+      <p class="dim">reach out if you want to collaborate</p>
+      <div class="contact-block">
+        <div class="contact-row">
+          <span class="k">email</span>
+          <span class="v" id="email-val">lsuroj61@gmail.com</span>
+          <button class="copy-btn" data-copy="lsuroj61@gmail.com">copy</button>
+        </div>
+        <div class="contact-row">
+          <span class="k">github</span>
+          <span class="v"><a href="https://github.com/u9iver63" target="_blank">github.com/u9iver63</a></span>
+          <button class="copy-btn" data-copy="github.com/u9iver63">copy</button>
+        </div>
+        <div class="contact-row">
+          <span class="k">location</span>
+          <span class="v">Kathmandu, Nepal</span>
+        </div>
+        <div class="status-echo">
+          <span class="prompt">$</span> echo $STATUS<br>
+          <span class="dim">→ open to interesting problems in algebraic geometry, formal methods, or Typst tooling.</span>
+        </div>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div class="cmdbar" id="cmdbar">
+  <span class="colon">:</span>
+  <input type="text" id="cmd-input" class="mono" placeholder="about · stack · projects · notes · contact · help">
+  <span class="cmd-hint">enter to run · esc to cancel</span>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+/* ---------------- clock ---------------- */
+function tick(){
+  const d = new Date();
+  document.getElementById('clock').textContent = d.toLocaleTimeString('en-GB');
+}
+tick(); setInterval(tick, 1000);
+
+/* ---------------- toggle sidebar ---------------- */
+const sidebar = document.getElementById('sidebar');
+const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
+
+function toggleSidebar() {
+  sidebar.classList.toggle('collapsed');
+  if(sidebar.classList.contains('collapsed')) {
+    showToast('Neo-tree closed');
+  } else {
+    showToast('Neo-tree opened');
+  }
+}
+btnToggleSidebar.addEventListener('click', toggleSidebar);
+
+/* ---------------- navigation ---------------- */
+const treeItems = Array.from(document.querySelectorAll('.tree-item'));
+const buffers = Array.from(document.querySelectorAll('.buffer'));
+const modePill = document.getElementById('mode-pill');
+const statusFile = document.getElementById('status-file');
+const fileNames = { about:'about.md', stack:'stack.toml', projects:'projects/', notes:'notes/', contact:'contact.txt' };
+
+let currentIndex = 0;
+
+function goTo(section){
+  const item = treeItems.find(t => t.dataset.section === section);
+  if(!item) return;
+  
+  if(section !== 'notes') { closePdf(); }
+
+  treeItems.forEach(t => t.classList.remove('active'));
+  buffers.forEach(b => b.classList.remove('active'));
+  item.classList.add('active');
+  document.querySelector('.buffer[data-section="'+section+'"]').classList.add('active');
+  modePill.textContent = item.dataset.mode;
+  modePill.style.background = item.dataset.color;
+  statusFile.textContent = fileNames[section];
+  currentIndex = treeItems.indexOf(item);
+}
+
+treeItems.forEach(item => {
+  item.addEventListener('click', () => goTo(item.dataset.section));
+});
+
+/* ---------------- keyboard nav & leader key ---------------- */
+let leaderActive = false;
+let leaderTimeout;
+
+document.addEventListener('keydown', (e) => {
+  if(cmdbar.classList.contains('show')) return; 
+  if(document.activeElement && ['INPUT','TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+  if (e.key === ' ' || e.key === 'Spacebar') {
+    e.preventDefault();
+    leaderActive = true;
+    clearTimeout(leaderTimeout);
+    leaderTimeout = setTimeout(() => { leaderActive = false; }, 800);
+    return;
+  }
+
+  if (leaderActive) {
+    if (e.key.toLowerCase() === 'e') {
+      e.preventDefault();
+      toggleSidebar();
+    }
+    leaderActive = false;
+    return; 
+  }
+
+  if(e.key === 'j'){ e.preventDefault(); currentIndex = Math.min(currentIndex+1, treeItems.length-1); goTo(treeItems[currentIndex].dataset.section); }
+  else if(e.key === 'k'){ e.preventDefault(); currentIndex = Math.max(currentIndex-1, 0); goTo(treeItems[currentIndex].dataset.section); }
+  else if(['1','2','3','4','5'].includes(e.key)){ const i = parseInt(e.key)-1; if(treeItems[i]) goTo(treeItems[i].dataset.section); }
+  else if(e.key === ':'){ e.preventDefault(); openCmd(); }
+});
+
+/* ---------------- command bar ---------------- */
+const cmdbar = document.getElementById('cmdbar');
+const cmdInput = document.getElementById('cmd-input');
+
+function openCmd(){
+  cmdbar.classList.add('show');
+  cmdInput.value = '';
+  cmdInput.focus();
+}
+function closeCmd(){
+  cmdbar.classList.remove('show');
+  cmdInput.blur();
+}
+cmdInput.addEventListener('keydown', (e) => {
+  if(e.key === 'Escape'){ closeCmd(); }
+  if(e.key === 'Enter'){
+    const cmd = cmdInput.value.trim().toLowerCase();
+    if(['about','stack','projects','notes','contact'].includes(cmd)){
+      goTo(cmd); closeCmd();
+    } else if(cmd === 'q' || cmd === 'q!' || cmd === 'wq'){
+      showToast("can't quit real life that easily :)");
+      closeCmd();
+    } else if (cmd === 'e' || cmd === 'explore' || cmd === 'neotree') {
+      toggleSidebar(); closeCmd();
+    } else if(cmd === 'help' || cmd === ''){
+      showToast('commands: about · stack · projects · notes · contact');
+    } else {
+      showToast('E492: not an editor command: ' + cmd);
+    }
+  }
+});
+document.addEventListener('click', (e) => {
+  if(cmdbar.classList.contains('show') && !cmdbar.contains(e.target)) closeCmd();
+});
+
+/* ---------------- toast ---------------- */
+let toastTimer;
+function showToast(msg){
+  const toast = document.getElementById('toast');
+  toast.textContent = msg;
+  toast.classList.add('show');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(()=> toast.classList.remove('show'), 2600);
+}
+
+/* ---------------- copy button ---------------- */
+document.querySelectorAll('.copy-btn').forEach(btn=>{
+  btn.addEventListener('click', ()=>{
+    const text = btn.dataset.copy;
+    navigator.clipboard?.writeText(text).then(()=> showToast('copied: ' + text)).catch(()=> showToast(text));
+  });
+});
+
+/* ---------------- PDF Viewer (Zathura Mode) ---------------- */
+const pdfViewer = document.getElementById('zathura-viewer');
+const pdfFrame = document.getElementById('pdf-frame');
+const zathuraTitle = document.getElementById('zathura-title');
+
+function openPdf(url, title) {
+  const viewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(url)}&embedded=true`;
+  pdfFrame.src = viewerUrl;
+  zathuraTitle.textContent = title;
+  pdfViewer.classList.add('active');
+  showToast(`Opened ${title} in Zathura mode`);
+}
+
+function closePdf() {
+  if(pdfViewer.classList.contains('active')) {
+    pdfViewer.classList.remove('active');
+    pdfFrame.src = "";
+    showToast('Closed Zathura');
+  }
+}
+
+/* ---------------- GITHUB CONTENT SCANNER (with caching) ---------------- */
+async function fetchAllRepos(username) {
+  const reposRes = await fetch(`https://api.github.com/users/${username}/repos?per_page=100`);
+  if (!reposRes.ok) throw new Error(`GitHub repos API error: ${reposRes.status}`);
+  const repos = await reposRes.json();
+  return repos.filter(r => !r.fork);
+}
+
+async function scanRepoTree(username, repoName, defaultBranch) {
+  const branch = defaultBranch || 'main';
+  const treeRes = await fetch(`https://api.github.com/repos/${username}/${repoName}/git/trees/${branch}?recursive=1`);
+  if (!treeRes.ok) return [];
+  const treeData = await treeRes.json();
+  return treeData.tree || [];
+}
+
+function buildRawUrl(username, repoName, branch, filePath) {
+  return `https://raw.githubusercontent.com/${username}/${repoName}/${branch}/${filePath}`;
+}
+
+/* ---------------- PDF + Markdown loader (with sessionStorage cache) ---------------- */
+async function loadAllNotes(username) {
+  const pdfContainer = document.getElementById('pdf-list-container');
+  const mdContainer = document.getElementById('notes-list');
+  const pdfLoading = document.getElementById('loading-pdfs');
+  const mdLoading = document.getElementById('loading-markdown');
+  const pdfCount = document.getElementById('pdf-count');
+  const pdfSub = document.getElementById('pdf-subtitle');
+
+  // Check cache first
+  const cacheKey = `notes_cache_${username}`;
+  const cached = sessionStorage.getItem(cacheKey);
+  if (cached) {
+    try {
+      const data = JSON.parse(cached);
+      renderPDFs(data.pdfs, pdfContainer, pdfCount, pdfSub);
+      renderMarkdownFiles(data.mds, mdContainer);
+      pdfLoading.remove();
+      mdLoading.remove();
+      return;
+    } catch(e) { sessionStorage.removeItem(cacheKey); }
+  }
+
+  // Show loading state
+  pdfLoading.style.display = 'block';
+  mdLoading.style.display = 'block';
+  pdfCount.textContent = 'fetching...';
+  pdfSub.textContent = 'Scanning repositories...';
+
+  try {
+    const repos = await fetchAllRepos(username);
+    if (repos.length === 0) {
+      pdfLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
+      mdLoading.innerHTML = '<span class="mono">No public repositories found.</span>';
+      pdfCount.textContent = '0';
+      return;
+    }
+
+    let allPdfs = [];
+    let allMds = [];
+
+    for (const repo of repos) {
+      const branch = repo.default_branch || 'main';
+      try {
+        const tree = await scanRepoTree(username, repo.name, branch);
+        for (const item of tree) {
+          if (item.type !== 'blob') continue;
+          const url = buildRawUrl(username, repo.name, branch, item.path);
+          if (item.path.toLowerCase().endsWith('.pdf')) {
+            allPdfs.push({ name: item.path, url, size: item.size, repo: repo.name });
+          } else if (item.path.toLowerCase().endsWith('.md')) {
+            allMds.push({ name: item.path, url, repo: repo.name });
+          }
+        }
+      } catch (e) { continue; }
+    }
+
+    // Cache results
+    sessionStorage.setItem(cacheKey, JSON.stringify({ pdfs: allPdfs, mds: allMds }));
+
+    pdfLoading.remove();
+    mdLoading.remove();
+
+    renderPDFs(allPdfs, pdfContainer, pdfCount, pdfSub);
+    renderMarkdownFiles(allMds, mdContainer);
+
+  } catch (error) {
+    console.warn(error);
+    pdfLoading.innerHTML = `<span class="mono">⚠️ GitHub API rate limit exceeded or network error. Try again later.</span>`;
+    mdLoading.innerHTML = `<span class="mono">⚠️ GitHub API rate limit exceeded or network error. Try again later.</span>`;
+    pdfCount.textContent = 'offline';
+    pdfSub.textContent = 'Could not reach GitHub';
+    // fallback static PDFs
+    const fallbackPdfs = [
+      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'topology-hw-4.pdf', size: 420000 },
+      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'elliptic-curves-intro.pdf', size: 1200000 },
+      { url: 'https://www.w3.org/WAI/ER/tests/xhtml/testfiles/resources/pdf/dummy.pdf', name: 'typst-calculus-plugin-docs.pdf', size: 850000 }
+    ];
+    renderPDFs(fallbackPdfs, pdfContainer, pdfCount, pdfSub);
+    showToast('⚠️ Using cached/offline data');
+  }
+}
+
+function renderPDFs(pdfs, container, countSpan, subtitle) {
+  if (pdfs.length === 0) {
+    container.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
+    countSpan.textContent = '0';
+    subtitle.textContent = 'No PDFs found across your repos.';
+    return;
+  }
+  countSpan.textContent = pdfs.length + ' PDFs';
+  subtitle.textContent = `Scanned repos — click to view in Zathura`;
+  pdfs.forEach(pdf => {
+    const pdfItem = document.createElement('div');
+    pdfItem.className = 'pdf-item';
+    pdfItem.setAttribute('data-src', pdf.url);
+    pdfItem.setAttribute('data-title', pdf.name);
+    const sizeText = pdf.size ? formatSize(pdf.size) : 'unknown';
+    pdfItem.innerHTML = `
+      <span>📄 <span style="color:var(--yellow);">${pdf.repo ? pdf.repo+'/' : ''}</span>${pdf.name}</span>
+      <span class="size">${sizeText}</span>
+    `;
+    pdfItem.addEventListener('click', () => openPdf(pdf.url, pdf.name));
+    container.appendChild(pdfItem);
+  });
+}
+
+function renderMarkdownFiles(mds, container) {
+  if (mds.length === 0) {
+    container.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
+    return;
+  }
+  mds.sort((a,b) => a.name.localeCompare(b.name));
+  mds.forEach(md => {
+    const noteDiv = document.createElement('div');
+    noteDiv.className = 'note-item';
+    noteDiv.innerHTML = `
+      <button class="note-head">
+        <span>${md.name}</span>
+        <span class="date mono">${md.repo}</span>
+        <span class="arrow">›</span>
+      </button>
+      <div class="note-body"><div class="note-body-inner">Loading...</div></div>
+    `;
+    container.appendChild(noteDiv);
+    const headBtn = noteDiv.querySelector('.note-head');
+    const bodyInner = noteDiv.querySelector('.note-body-inner');
+    headBtn.addEventListener('click', async () => {
+      noteDiv.classList.toggle('open');
+      if (noteDiv.classList.contains('open') && bodyInner.textContent === 'Loading...') {
+        try {
+          const res = await fetch(md.url);
+          if (!res.ok) throw new Error('Failed to fetch');
+          bodyInner.textContent = await res.text();
+        } catch (err) {
+          bodyInner.textContent = 'Error loading content.';
+        }
+      }
+    });
+  });
+  showToast(`Loaded ${mds.length} Markdown notes`);
+}
+
+function formatSize(bytes) {
+  if (bytes < 1024) return bytes + ' B';
+  if (bytes < 1048576) return (bytes / 1024).toFixed(1) + ' KB';
+  return (bytes / 1048576).toFixed(1) + ' MB';
+}
+
+/* ---------------- start loading notes ---------------- */
+const GITHUB_USER = 'u9iver63';  // change to your GitHub username
+loadAllNotes(GITHUB_USER);
+
+/* ---------------- GITHUB PROJECTS AUTO-LOAD ---------------- */
+async function loadGitHubProjects(username) {
+  const container = document.getElementById('proj-grid-container');
+  const loadingEl = document.getElementById('loading-github');
+  const countSpan = document.getElementById('repo-count');
+  const subtitle = document.getElementById('projects-subtitle');
+  const fallbackDiv = document.getElementById('static-projects-fallback');
+  
+  const API_URL = `https://api.github.com/users/${username}/repos?sort=pushed&per_page=100`;
+  
+  try {
+    const response = await fetch(API_URL);
+    if (!response.ok) throw new Error(`GitHub API responded with ${response.status}`);
+    
+    const repos = await response.json();
+    if (!repos.length) throw new Error('No public repositories found.');
+    
+    loadingEl.remove();
+    
+    const displayedRepos = repos.filter(repo => !repo.fork).slice(0, 12);
+    
+    countSpan.textContent = displayedRepos.length + ' repos';
+    subtitle.textContent = 'live from GitHub — sorted by last push';
+    
+    displayedRepos.forEach(repo => {
+      const card = document.createElement('div');
+      card.className = 'proj-card';
+      card.style.borderLeftColor = getLanguageColor(repo.language);
+      
+      const langTag = repo.language ? `<span>${repo.language}</span>` : '';
+      const desc = repo.description || 'No description provided.';
+      const starBadge = repo.stargazers_count > 0 ? `<span>⭐ ${repo.stargazers_count}</span>` : '';
+      const forkBadge = repo.forks_count > 0 ? `<span>🍴 ${repo.forks_count}</span>` : '';
+      
+      card.innerHTML = `
+        <a href="${repo.html_url}" target="_blank" class="repo-link">
+          <div class="proj-head">
+            <h3>${repo.name}</h3>
+            <span class="status">${new Date(repo.pushed_at).toLocaleDateString()}</span>
+          </div>
+          <p>${desc}</p>
+          <div class="meta-badges">
+            ${langTag}
+            ${starBadge}
+            ${forkBadge}
+          </div>
+        </a>
+      `;
+      container.appendChild(card);
+    });
+    
+  } catch (error) {
+    console.warn('GitHub fetch failed, using static fallback:', error);
+    loadingEl.remove();
+    countSpan.textContent = 'offline';
+    subtitle.textContent = 'could not reach GitHub API — showing static snapshot';
+    fallbackDiv.style.display = 'block';
+    showToast('⚠️ GitHub API unreachable — loaded offline fallback');
+  }
+}
+
+function getLanguageColor(lang) {
+  const colors = {
+    'JavaScript': '#f1e05a',
+    'Python': '#3572A5',
+    'TypeScript': '#3178c6',
+    'Rust': '#dea584',
+    'C++': '#f34b7d',
+    'Haskell': '#5e5086',
+    'Julia': '#a270ba',
+    'Typst': '#239DAD',
+    'Lean': '#17980E',
+    'Shell': '#89e051',
+    'Jupyter Notebook': '#DA5B0B',
+  };
+  return colors[lang] || 'var(--blue)';
+}
+
+loadGitHubProjects(GITHUB_USER);
+</script>
+</body>
+</html>
