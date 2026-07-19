@@ -124,26 +124,22 @@
     .loading-placeholder { color:var(--text-dimmer); text-align:center; padding:20px; border:1px dashed var(--line); border-radius:4px; margin:20px 0; animation:pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    /* Notes & PDFs */
-    .note-item { border-bottom:1px solid var(--line); }
-    .note-head { width:100%; background:none; border:none; text-align:left; padding:14px 0; cursor:pointer; display:flex; justify-content:space-between; align-items:center; color:var(--text); font-size:0.88rem; }
-    .note-head .arrow { color:var(--magenta); transition:transform .18s; flex-shrink:0; margin-left:12px; }
-    .note-item.open > .note-head .arrow { transform:rotate(90deg); }
-    .note-head .date { color:var(--text-dimmer); font-size:0.76rem; margin-right:auto; margin-left:14px; }
-    .note-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
-    /* Allow open files to be very tall */
-    .note-item.open > .note-body { max-height:5000px; overflow-y:auto; }
-    .note-body-inner { padding:0 0 16px; color:var(--text-dim); font-size:0.88rem; line-height:1.7; }
+    /* Notes list (simple file list) */
+    .notes-file-list { display:flex; flex-direction:column; gap:4px; }
+    .notes-file-item {
+      padding:8px 12px; background:var(--bg2); border:1px solid var(--line); border-radius:4px;
+      cursor:pointer; transition:background .15s,border-color .15s;
+      display:flex; justify-content:space-between; align-items:center; font-size:0.85rem;
+    }
+    .notes-file-item:hover { background:var(--panel); border-color:var(--blue); }
+    .notes-file-item .repo-badge { color:var(--text-dimmer); font-size:0.7rem; }
 
-    /* Repo folder */
-    .repo-folder > .note-head { font-weight:600; color:var(--blue); }
-    .repo-folder .note-item { border-bottom:none; }
-    .repo-folder .note-head { padding:10px 0; font-size:0.82rem; }
-
+    /* PDFs */
     .pdf-grid { display:grid; gap:10px; margin-bottom:32px; }
     .pdf-item { background:var(--bg2); border:1px solid var(--line); padding:12px 16px; border-radius:4px; cursor:pointer; font-size:0.85rem; color:var(--blue); transition:all 0.2s; display:flex; justify-content:space-between; align-items:center; }
     .pdf-item:hover { border-color:var(--blue); background:var(--panel); } .pdf-item .size { color:var(--text-dimmer); font-size:0.7rem; }
 
+    /* Zathura viewer */
     .zathura-viewer { display:none; flex-direction:column; height:600px; border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-bottom:32px; }
     .zathura-viewer.active { display:flex; }
     .zathura-bar { background:var(--bg2); padding:8px 12px; font-size:0.75rem; color:var(--text-dim); display:flex; justify-content:space-between; border-bottom:1px solid var(--line); align-items:center; }
@@ -151,6 +147,29 @@
     .zathura-bar button:hover { background:var(--red); color:var(--bg2); }
     iframe.pdf-frame { flex:1; width:100%; border:none; background:#ececec; }
 
+    /* Markdown viewer side panel */
+    .md-viewer-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:250; }
+    .md-viewer-overlay.show { display:block; }
+    .md-viewer-panel {
+      position:fixed; top:0; right:0; width:50%; min-width:360px; height:100%;
+      background:var(--bg2); border-left:2px solid var(--blue);
+      z-index:260; transform:translateX(100%); transition:transform 0.25s ease;
+      display:flex; flex-direction:column;
+      padding:0; box-shadow:-4px 0 20px rgba(0,0,0,0.6);
+    }
+    .md-viewer-panel.show { transform:translateX(0); }
+    .md-viewer-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:12px 16px; border-bottom:1px solid var(--line); background:var(--bg2);
+    }
+    .md-viewer-title { color:var(--cyan); font-size:0.88rem; font-weight:600; }
+    .md-viewer-close { background:none; border:none; color:var(--red); font-size:1.2rem; cursor:pointer; }
+    .md-viewer-content {
+      flex:1; overflow-y:auto; padding:24px 28px;
+      color:var(--text); font-size:0.88rem; line-height:1.7;
+    }
+
+    /* Contact */
     .contact-block { font-size:0.92rem; } .contact-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
     .contact-row .k { color:var(--red); width:80px; flex-shrink:0; } .contact-row .v { color:var(--text); }
     .copy-btn { background:none; border:1px solid var(--line); color:var(--text-dimmer); border-radius:3px; padding:2px 8px; font-size:0.68rem; cursor:pointer; margin-left:auto; transition:background-color .15s; }
@@ -178,8 +197,8 @@
     .floating-panel .close-btn:hover { color:#ff9e9e; }
     .search-item { padding:6px 0; border-bottom:1px solid var(--line); cursor:pointer; transition:background .12s; } .search-item:hover { background:var(--panel); color:var(--blue); } .search-item .type { color:var(--text-dimmer); font-size:0.7rem; }
 
-    @media print { .statusline,.sidebar,.bufferline,.cmdbar,.toast-container,.scroll-top-btn,.floating-panel,.zathura-viewer,.copy-btn { display:none!important; } body { background:white; color:black; font-family:'JetBrains Mono',monospace; } .buffer { padding:0; max-width:100%; display:block!important; opacity:1!important; } .buffer .lines { border-left:none; } .line::before { display:none; } .main-content { overflow:visible; } a { color:black; border-bottom:none; } }
-    @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } }
+    @media print { .statusline,.sidebar,.bufferline,.cmdbar,.toast-container,.scroll-top-btn,.floating-panel,.zathura-viewer,.copy-btn,.md-viewer-panel,.md-viewer-overlay { display:none!important; } body { background:white; color:black; font-family:'JetBrains Mono',monospace; } .buffer { padding:0; max-width:100%; display:block!important; opacity:1!important; } .buffer .lines { border-left:none; } .line::before { display:none; } .main-content { overflow:visible; } a { color:black; border-bottom:none; } }
+    @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } .md-viewer-panel { width:85vw; min-width:auto; } }
   </style>
 </head>
 <body>
@@ -187,7 +206,7 @@
 <div class="statusline">
   <span class="mono mode-pill" id="mode-pill" style="color:#1A1B26;background:#7AA2F7;">NORMAL</span>
   <span class="sep">│</span>
-  <button id="btn-toggle-sidebar" class="status-btn" title="Toggle Sidebar (Space + e)">[☰]</button>
+  <button id="btn-toggle-sidebar" class="status-btn" title="Toggle Sidebar (Space + e / Ctrl+E)">[☰]</button>
   <span class="sep">│</span>
   <span id="status-file">about.md</span>
   <span class="sep">│</span>
@@ -210,7 +229,7 @@
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false"><span class="icon">▸</span> contact.txt</button>
     <div class="sidebar-hint">
       <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>6</kbd> navigate</div>
-      <div><kbd>SPC</kbd> <kbd>e</kbd> toggle explorer</div>
+      <div><kbd>SPC</kbd> <kbd>e</kbd> / <kbd>Ctrl+E</kbd> toggle explorer</div>
       <div><kbd>:</kbd> command mode</div>
     </div>
   </aside>
@@ -281,7 +300,7 @@
         <div class="zathura-viewer" id="zathura-viewer"><div class="zathura-bar"><span>[zathura] <span id="zathura-title" style="color:var(--cyan)"></span></span><button onclick="closeMedia()">[q] quit</button></div><iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen loading="lazy"></iframe></div>
         <div class="pdf-grid" id="pdf-list-container"><div class="loading-placeholder" id="loading-pdfs">⟳ loading PDFs…</div></div>
         <h2>## raw_markdown</h2>
-        <p class="dim">Markdown notes from your repositories — click to expand.</p>
+        <p class="dim">Click a file to open it in a side panel</p>
         <div id="notes-list"><div class="loading-placeholder" id="loading-markdown">⟳ loading Markdown files…</div></div>
         <div id="retry-notes" style="display:none; margin-top:10px;"><button onclick="loadContent()" style="background:var(--panel);border:1px solid var(--line);color:var(--blue);padding:6px 12px;">Retry</button></div>
       </section>
@@ -333,7 +352,7 @@
   <ul>
     <li><span class="key">j</span> / <span class="key">k</span> — navigate sections</li>
     <li><span class="key">1</span>–<span class="key">6</span> — jump to section</li>
-    <li><span class="key">SPC</span> <span class="key">e</span> — toggle file tree</li>
+    <li><span class="key">Ctrl+E</span> / <span class="key">SPC e</span> — toggle file tree</li>
     <li><span class="key">:</span> — open command bar</li>
     <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:contact</span></li>
     <li><span class="key">:resume</span> — download resume</li>
@@ -347,6 +366,16 @@
   <button class="close-btn" onclick="closeSearch()">✕</button>
   <h3>🔍 Search Results</h3>
   <div id="search-results"></div>
+</div>
+
+<!-- Markdown Viewer Side Panel -->
+<div class="md-viewer-overlay" id="md-viewer-overlay"></div>
+<div class="md-viewer-panel" id="md-viewer-panel">
+  <div class="md-viewer-header">
+    <span class="md-viewer-title" id="md-viewer-title">📄 note.md</span>
+    <button class="md-viewer-close" onclick="closeMdViewer()">✕</button>
+  </div>
+  <div class="md-viewer-content markdown-body" id="md-viewer-content">Loading...</div>
 </div>
 
 <script>
@@ -424,7 +453,7 @@ tick();
 setInterval(tick, 60000);
 
 /* ==========================================================
-   SIDEBAR TOGGLE
+   SIDEBAR TOGGLE (Ctrl+E & SPC e)
    ========================================================== */
 const sidebar = document.getElementById('sidebar');
 const backdrop = document.getElementById('sidebar-backdrop');
@@ -439,6 +468,14 @@ function toggleSidebar() {
 }
 btnToggleSidebar.addEventListener('click', toggleSidebar);
 backdrop.addEventListener('click', closeSidebar);
+
+// Ctrl+E shortcut (and Cmd+E for Mac)
+document.addEventListener('keydown', (e) => {
+  if (e.key === 'e' && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    toggleSidebar();
+  }
+});
 
 /* ==========================================================
    BUFFERLINE & NAVIGATION
@@ -493,7 +530,7 @@ treeItems.forEach(item => item.addEventListener('click', () => goTo(item.dataset
 renderBufferline();
 
 /* ==========================================================
-   KEYBOARD NAVIGATION & LEADER KEY
+   KEYBOARD NAVIGATION & LEADER KEY (SPC e still works)
    ========================================================== */
 let leaderActive = false, leaderTimeout;
 document.addEventListener('keydown', e => {
@@ -531,6 +568,7 @@ document.addEventListener('keydown', e => {
     closeHelp();
     closeSearch();
     closeMedia();
+    closeMdViewer();
   }
 });
 
@@ -710,7 +748,10 @@ function performSearch(query) {
       div.innerHTML = `<span class="type">[${item.type}]</span> <strong>${item.name}</strong> <span class="dim">${item.repo ? 'in ' + item.repo : ''}</span>`;
       div.addEventListener('click', () => {
         if (item.type === 'pdf') openMedia(item.url, item.name);
-        else if (item.type === 'md') window.open(item.url, '_blank');
+        else if (item.type === 'md') {
+          // Open the markdown viewer side panel with this file
+          openMdViewer(item.url, item.name);
+        }
         else if (item.link) window.open(item.link, '_blank');
         closeSearch();
       });
@@ -723,6 +764,40 @@ function closeSearch() { searchPanel.classList.remove('show'); }
 document.addEventListener('click', e => {
   if (searchPanel.classList.contains('show') && !searchPanel.contains(e.target)) closeSearch();
 });
+
+/* ==========================================================
+   MARKDOWN VIEWER SIDE PANEL
+   ========================================================== */
+const mdOverlay = document.getElementById('md-viewer-overlay');
+const mdPanel = document.getElementById('md-viewer-panel');
+const mdViewerTitle = document.getElementById('md-viewer-title');
+const mdViewerContent = document.getElementById('md-viewer-content');
+
+function openMdViewer(url, title) {
+  mdViewerTitle.textContent = title;
+  mdViewerContent.innerHTML = 'Loading...';
+  mdOverlay.classList.add('show');
+  mdPanel.classList.add('show');
+  // Fetch and render
+  fetch(url)
+    .then(res => {
+      if (!res.ok) throw new Error('Failed to fetch');
+      return res.text();
+    })
+    .then(rawText => {
+      renderMarkdown(rawText, mdViewerContent, url);
+    })
+    .catch(() => {
+      mdViewerContent.innerHTML = '<p class="dim">Could not load note.</p>';
+    });
+}
+
+function closeMdViewer() {
+  mdOverlay.classList.remove('show');
+  mdPanel.classList.remove('show');
+}
+
+mdOverlay.addEventListener('click', closeMdViewer);
 
 /* ==========================================================
    LOAD NOW.MD
@@ -745,7 +820,7 @@ async function loadNow() {
 }
 
 /* ==========================================================
-   STATIC MANIFEST LOADER (ACCORDION NOTES – BUGFIX)
+   STATIC MANIFEST LOADER (WITH SIDE PANEL NOTES)
    ========================================================== */
 async function loadContent() {
   const projGrid = document.getElementById('proj-grid-container');
@@ -827,118 +902,24 @@ async function loadContent() {
       });
     }
 
-    /* ======== GROUPED MARKDOWN – TRUE ACCORDION + NO HEIGHT CLIPPING ======== */
+    // --- Render Markdown files as a simple list (click to open in side panel) ---
     mdLoading.remove();
     if (!allMds.length) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
     } else {
-      const grouped = {};
-      repos.forEach(repo => {
-        const repoName = repo.name;
-        const repoMds = allMds.filter(md => md.repo === repoName);
-        if (repoMds.length) {
-          grouped[repoName] = {
-            branch: repo.defaultBranch || 'main',
-            files: repoMds
-          };
-        }
-      });
-
-      let currentlyOpenFolder = null;
-
-      Object.keys(grouped).sort().forEach(repoName => {
-        const group = grouped[repoName];
-        const folderDiv = document.createElement('div');
-        folderDiv.className = 'note-item repo-folder';
-
-        folderDiv.innerHTML = `
-          <button class="note-head repo-head">
-            <span>📁 ${repoName}/</span>
-            <span class="date">${group.branch}</span>
-            <span class="arrow">›</span>
-          </button>
-          <div class="note-body" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease;">
-            <div class="note-body-inner" style="padding:0;"></div>
-          </div>
-        `;
-        mdContainer.appendChild(folderDiv);
-
-        const headBtn = folderDiv.querySelector('.repo-head');
-        const bodyDiv = folderDiv.querySelector('.note-body');
-        const bodyInner = bodyDiv.querySelector('.note-body-inner');
-
-        group.files.sort((a, b) => a.name.localeCompare(b.name));
-        group.files.forEach(md => {
-          const fileItem = document.createElement('div');
-          fileItem.className = 'note-item';
-          fileItem.style.borderBottom = 'none';
-          fileItem.innerHTML = `
-            <button class="note-head">
-              <span style="padding-left:20px;">📄 ${md.name.split('/').pop()}</span>
-              <span class="date dim">${md.name}</span>
-              <span class="arrow">›</span>
-            </button>
-            <div class="note-body">
-              <div class="note-body-inner">Loading...</div>
-            </div>
-          `;
-          bodyInner.appendChild(fileItem);
-
-          const fileHead = fileItem.querySelector('.note-head');
-          const fileInner = fileItem.querySelector('.note-body-inner');
-
-          fileHead.addEventListener('click', async (e) => {
-            e.stopPropagation();
-            const siblings = bodyInner.querySelectorAll(':scope > .note-item');
-            siblings.forEach(s => { if (s !== fileItem) s.classList.remove('open'); });
-
-            fileItem.classList.toggle('open');
-            if (fileItem.classList.contains('open') && fileInner.textContent === 'Loading...') {
-              try {
-                const res = await fetch(md.url);
-                if (!res.ok) throw new Error('Failed to fetch');
-                const rawText = await res.text();
-                renderMarkdown(rawText, fileInner, md.url);
-              } catch (err) {
-                fileInner.textContent = 'Error loading content.';
-              }
-            }
-          });
+      const listDiv = document.createElement('div');
+      listDiv.className = 'notes-file-list';
+      allMds.sort((a, b) => a.name.localeCompare(b.name));
+      allMds.forEach(md => {
+        const item = document.createElement('div');
+        item.className = 'notes-file-item';
+        item.innerHTML = `<span>📄 ${md.name}</span><span class="repo-badge">${md.repo}</span>`;
+        item.addEventListener('click', () => {
+          openMdViewer(md.url, md.name);
         });
-
-        // Folder click – accordion + generous height
-        headBtn.addEventListener('click', () => {
-          const isOpen = folderDiv.classList.contains('open');
-          // Close previously open folder if different
-          if (currentlyOpenFolder && currentlyOpenFolder !== folderDiv) {
-            currentlyOpenFolder.classList.remove('open');
-            currentlyOpenFolder.querySelector('.repo-head .arrow').style.transform = 'rotate(0deg)';
-            currentlyOpenFolder.querySelector('.note-body').style.maxHeight = '0';
-            const prevFiles = currentlyOpenFolder.querySelectorAll(':scope .note-item.open');
-            prevFiles.forEach(f => f.classList.remove('open'));
-          }
-
-          if (isOpen) {
-            // Collapse this folder
-            folderDiv.classList.remove('open');
-            headBtn.querySelector('.arrow').style.transform = 'rotate(0deg)';
-            bodyDiv.style.maxHeight = '0';
-            const openFiles = folderDiv.querySelectorAll(':scope .note-item.open');
-            openFiles.forEach(f => f.classList.remove('open'));
-            currentlyOpenFolder = null;
-          } else {
-            // Expand: set a very generous max-height so nothing gets clipped
-            folderDiv.classList.add('open');
-            headBtn.querySelector('.arrow').style.transform = 'rotate(90deg)';
-            bodyDiv.style.maxHeight = '5000px';  // more than enough for any note
-            currentlyOpenFolder = folderDiv;
-          }
-        });
-
-        // Initial arrow state
-        headBtn.querySelector('.arrow').style.transform = 'rotate(0deg)';
+        listDiv.appendChild(item);
       });
-
+      mdContainer.appendChild(listDiv);
       showToast(`Loaded ${allMds.length} Markdown notes`);
     }
 
