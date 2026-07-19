@@ -131,7 +131,8 @@
     .note-item.open > .note-head .arrow { transform:rotate(90deg); }
     .note-head .date { color:var(--text-dimmer); font-size:0.76rem; margin-right:auto; margin-left:14px; }
     .note-body { max-height:0; overflow:hidden; transition:max-height 0.3s ease; }
-    .note-item.open > .note-body { max-height:600px; overflow-y:auto; }
+    /* Allow open files to be very tall */
+    .note-item.open > .note-body { max-height:5000px; overflow-y:auto; }
     .note-body-inner { padding:0 0 16px; color:var(--text-dim); font-size:0.88rem; line-height:1.7; }
 
     /* Repo folder */
@@ -744,7 +745,7 @@ async function loadNow() {
 }
 
 /* ==========================================================
-   STATIC MANIFEST LOADER (WITH ACCORDION NOTES)
+   STATIC MANIFEST LOADER (ACCORDION NOTES – BUGFIX)
    ========================================================== */
 async function loadContent() {
   const projGrid = document.getElementById('proj-grid-container');
@@ -826,7 +827,7 @@ async function loadContent() {
       });
     }
 
-    /* ======== GROUPED MARKDOWN WITH TRUE ACCORDION ======== */
+    /* ======== GROUPED MARKDOWN – TRUE ACCORDION + NO HEIGHT CLIPPING ======== */
     mdLoading.remove();
     if (!allMds.length) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
@@ -843,7 +844,6 @@ async function loadContent() {
         }
       });
 
-      // Keep track of currently open folder to implement accordion
       let currentlyOpenFolder = null;
 
       Object.keys(grouped).sort().forEach(repoName => {
@@ -906,38 +906,36 @@ async function loadContent() {
           });
         });
 
-        // Folder click – accordion behavior
+        // Folder click – accordion + generous height
         headBtn.addEventListener('click', () => {
           const isOpen = folderDiv.classList.contains('open');
-          // Close previously open folder (if any and different from this one)
+          // Close previously open folder if different
           if (currentlyOpenFolder && currentlyOpenFolder !== folderDiv) {
             currentlyOpenFolder.classList.remove('open');
             currentlyOpenFolder.querySelector('.repo-head .arrow').style.transform = 'rotate(0deg)';
             currentlyOpenFolder.querySelector('.note-body').style.maxHeight = '0';
-            // Also close any open files inside the previously open folder
             const prevFiles = currentlyOpenFolder.querySelectorAll(':scope .note-item.open');
             prevFiles.forEach(f => f.classList.remove('open'));
           }
 
           if (isOpen) {
-            // Close this folder
+            // Collapse this folder
             folderDiv.classList.remove('open');
             headBtn.querySelector('.arrow').style.transform = 'rotate(0deg)';
             bodyDiv.style.maxHeight = '0';
-            // Close files inside
             const openFiles = folderDiv.querySelectorAll(':scope .note-item.open');
             openFiles.forEach(f => f.classList.remove('open'));
             currentlyOpenFolder = null;
           } else {
-            // Open this folder
+            // Expand: set a very generous max-height so nothing gets clipped
             folderDiv.classList.add('open');
             headBtn.querySelector('.arrow').style.transform = 'rotate(90deg)';
-            bodyDiv.style.maxHeight = bodyDiv.scrollHeight + 'px';
+            bodyDiv.style.maxHeight = '5000px';  // more than enough for any note
             currentlyOpenFolder = folderDiv;
           }
         });
 
-        // Ensure arrow starts at 0deg
+        // Initial arrow state
         headBtn.querySelector('.arrow').style.transform = 'rotate(0deg)';
       });
 
