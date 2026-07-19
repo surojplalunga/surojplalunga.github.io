@@ -68,7 +68,13 @@
     .mode-pill { padding:2px 10px; border-radius:2px; font-weight:700; letter-spacing:0.04em; color:var(--bg2); transition:background-color .2s; }
     .status-btn { background:none; border:none; color:var(--text-dim); cursor:pointer; padding:2px 6px; border-radius:2px; transition:background-color .15s,color .15s; }
     .status-btn:hover { color:var(--text); background:var(--panel); }
-    .statusline .sep { color:var(--text-dimmer); } .statusline .spacer { flex:1; } .statusline .clock { color:var(--text-dim); }
+    .statusline .sep { color:var(--text-dimmer); }
+    .statusline .spacer { flex:1; }
+    .statusline .clock, .statusline .cmd-hint-status { color:var(--text-dim); }
+    /* Hide extra info on mobile */
+    @media (max-width:768px) {
+      .statusline .clock, .statusline .cmd-hint-status { display:none; }
+    }
 
     .workspace { flex:1; display:flex; min-height:0; position:relative; }
     .sidebar { width:238px; flex-shrink:0; background:var(--bg2); border-right:1px solid var(--line); padding:18px 0; overflow-y:auto; transition:transform 0.25s ease; z-index:50; }
@@ -155,7 +161,8 @@
     .cmdbar { position:fixed; left:0; right:0; bottom:0; background:var(--bg2); border-top:1px solid var(--line); display:none; align-items:center; padding:8px 16px; font-size:0.88rem; z-index:100; }
     .cmdbar.show { display:flex; } .cmdbar .colon { color:var(--yellow); margin-right:4px; }
     .cmdbar input { flex:1; background:none; border:none; color:var(--text); font-size:0.9rem; caret-color:var(--text); }
-    .cmdbar input:focus { outline:none; } .cmdbar .cmd-hint { color:var(--text-dimmer); font-size:0.72rem; }
+    .cmdbar input:focus { outline:none; }
+    .cmdbar .cmd-hint { color:var(--text-dimmer); font-size:0.72rem; }
     .cmdbar .cursor-blink { width:2px; height:1.1em; background:var(--text); display:inline-block; margin-left:1px; animation:blink 1s step-end infinite; }
     @keyframes blink { 50%{opacity:0} }
 
@@ -194,8 +201,29 @@
     .md-viewer-close { background:none; border:none; color:var(--red); font-size:1.2rem; cursor:pointer; }
     .md-viewer-content { flex:1; overflow-y:auto; padding:24px 28px; color:var(--text); font-size:0.88rem; line-height:1.7; }
 
-    @media print { .statusline,.sidebar,.bufferline,.cmdbar,.toast-container,.scroll-top-btn,.floating-panel,.zathura-viewer,.copy-btn,.md-viewer-panel,.md-viewer-overlay { display:none!important; } body { background:white; color:black; font-family:'JetBrains Mono',monospace; } .buffer { padding:0; max-width:100%; display:block!important; opacity:1!important; } .buffer .lines { border-left:none; } .line::before { display:none; } .main-content { overflow:visible; } a { color:black; border-bottom:none; } }
-    @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } .md-viewer-panel { width:85vw; min-width:auto; } }
+    /* Mobile adjustments */
+    @media (max-width:768px) {
+      .statusline { font-size:0.68rem; gap:8px; padding:0 8px; }
+      .mode-pill { padding:2px 6px; font-size:0.65rem; }
+      .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); }
+      .sidebar.open { transform:translateX(0); }
+      .sidebar-backdrop.visible { display:block; }
+      .buffer { padding:24px 20px 80px; max-width:100%; }
+      .buffer h1 { font-size:2rem; }
+      .lines { border-left:none; margin-left:0; }
+      .line { padding-left:0; }
+      .line::before { display:none; }
+      .toml-row { flex-direction:column; gap:4px; }
+      .toml-key { width:auto; }
+      .proj-grid { grid-template-columns:1fr; }
+      .zathura-viewer { height:400px; }
+      .cmdbar .cmd-hint { display:none; }
+      .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); }
+      .floating-panel { width:90vw; max-height:70vh; }
+      .md-viewer-panel { width:85vw; min-width:auto; }
+      .keymaps-table { font-size:0.75rem; }
+      .keymaps-table th, .keymaps-table td { padding:4px 6px; }
+    }
   </style>
 </head>
 <body>
@@ -209,7 +237,7 @@
   <span class="sep">│</span>
   <span>tmux: portfolio</span>
   <div class="spacer"></div>
-  <span>press <kbd style="background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">:</kbd> for commands</span>
+  <span class="cmd-hint-status">press <kbd style="background:var(--panel);border:1px solid var(--line);border-radius:3px;padding:1px 5px;">:</kbd> for commands</span>
   <span class="sep">│</span>
   <span class="clock" id="clock">--:--</span>
 </div>
@@ -1010,16 +1038,13 @@ function buildKeymapsTable() {
 
   let html = '<table class="keymaps-table"><tr><th>Key</th><th>Action</th></tr>';
 
-  // Normal keymaps
   for (const [key, action] of Object.entries(KEYMAP)) {
-    if (key === 'g') continue; // 'gg' is special, we show it manually
+    if (key === 'g') continue;
     html += `<tr><td class="key-col">${key}</td><td class="action-col">${actionLabels[action] || action}</td></tr>`;
   }
 
-  // Add 'gg' manually
   html += `<tr><td class="key-col">gg</td><td class="action-col">Scroll to top</td></tr>`;
 
-  // Leader keymaps
   for (const [key, action] of Object.entries(LEADER_MAP)) {
     html += `<tr><td class="key-col">SPC ${key}</td><td class="action-col">${actionLabels[action] || action}</td></tr>`;
   }
@@ -1028,7 +1053,6 @@ function buildKeymapsTable() {
   container.innerHTML = html;
 }
 
-// Call after page load
 window.addEventListener('load', buildKeymapsTable);
 
 /* ==========================================================
