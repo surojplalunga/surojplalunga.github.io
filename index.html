@@ -234,22 +234,25 @@
     @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.5; } }
 
     /* ============================================================
-       NOTES & PDFS
+       NOTES & PDFS (ACCORDION STYLE)
        ============================================================ */
     .note-item { border-bottom: 1px solid var(--line); }
-    .note-head { width: 100%; background: none; border: none; text-align: left; padding: 14px 0; cursor: pointer; display: flex; justify-content: space-between; align-items: center; color: var(--text); font-size: 0.88rem; }
+    .note-head {
+      width: 100%; background: none; border: none; text-align: left; padding: 14px 0;
+      cursor: pointer; display: flex; justify-content: space-between; align-items: center;
+      color: var(--text); font-size: 0.88rem;
+    }
     .note-head .arrow { color: var(--magenta); transition: transform .18s; flex-shrink: 0; margin-left: 12px; }
-    .note-item.open .arrow { transform: rotate(90deg); }
+    .note-item.open > .note-head .arrow { transform: rotate(90deg); }
     .note-head .date { color: var(--text-dimmer); font-size: 0.76rem; margin-right: auto; margin-left: 14px; }
-    .note-body { max-height: 0; overflow: hidden; transition: max-height .2s ease; }
-    .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
+    .note-body { max-height: 0; overflow: hidden; transition: max-height 0.3s ease; }
+    .note-item.open > .note-body { max-height: 600px; overflow-y: auto; }
     .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
 
-    /* Repository folder styling */
-    .repo-folder > .note-body { padding-left: 8px; }
+    /* Repository folder */
     .repo-folder > .note-head { font-weight: 600; color: var(--blue); }
     .repo-folder .note-item { border-bottom: none; }
-    .repo-folder .note-head { padding: 8px 0; font-size: 0.82rem; }
+    .repo-folder .note-head { padding: 10px 0; font-size: 0.82rem; }
 
     .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
     .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
@@ -357,9 +360,7 @@
 </head>
 <body>
 
-  <!-- ==========================================================
-       STATUSLINE
-       ========================================================== -->
+  <!-- STATUSLINE -->
   <div class="statusline">
     <span class="mono mode-pill" id="mode-pill" style="color:#1A1B26;background:#7AA2F7;">NORMAL</span>
     <span class="sep">│</span>
@@ -374,15 +375,8 @@
     <span class="clock" id="clock">--:--</span>
   </div>
 
-  <!-- ==========================================================
-       WORKSPACE
-       ========================================================== -->
   <div class="workspace">
-
-    <!-- Sidebar backdrop (mobile) -->
     <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-
-    <!-- Sidebar -->
     <aside class="sidebar" id="sidebar">
       <div class="path">~/suroj-plalunga</div>
       <button class="tree-item active" data-section="about" data-mode="NORMAL" data-color="#7AA2F7" role="tab" aria-selected="true"><span class="icon">▸</span> about.md</button>
@@ -398,7 +392,6 @@
       </div>
     </aside>
 
-    <!-- Main content -->
     <main class="main">
       <div class="bufferline" id="bufferline"></div>
       <div class="main-content">
@@ -527,13 +520,11 @@
           </form>
         </section>
 
-      </div><!-- /main-content -->
+      </div>
     </main>
-  </div><!-- /workspace -->
+  </div>
 
-  <!-- ==========================================================
-       COMMAND BAR
-       ========================================================== -->
+  <!-- COMMAND BAR -->
   <div class="cmdbar" id="cmdbar" role="dialog" aria-label="command input">
     <span class="colon">:</span>
     <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · contact · help" aria-label="command">
@@ -541,15 +532,11 @@
     <span class="cmd-hint">enter to run · esc to cancel</span>
   </div>
 
-  <!-- ==========================================================
-       TOASTS & SCROLL‑TO‑TOP
-       ========================================================== -->
+  <!-- TOASTS & SCROLL -->
   <div class="toast-container" id="toast-container"></div>
   <button class="scroll-top-btn" id="scroll-top-btn" title="Scroll to top">↑</button>
 
-  <!-- ==========================================================
-       HELP PANEL
-       ========================================================== -->
+  <!-- HELP PANEL -->
   <div class="floating-panel" id="help-panel">
     <button class="close-btn" onclick="closeHelp()">✕</button>
     <h3>📖 Help</h3>
@@ -566,18 +553,13 @@
     </ul>
   </div>
 
-  <!-- ==========================================================
-       SEARCH PANEL
-       ========================================================== -->
+  <!-- SEARCH PANEL -->
   <div class="floating-panel" id="search-panel">
     <button class="close-btn" onclick="closeSearch()">✕</button>
     <h3>🔍 Search Results</h3>
     <div id="search-results"></div>
   </div>
 
-  <!-- ==========================================================
-       JAVASCRIPT
-       ========================================================== -->
   <script>
     /* ==========================================================
        CONFIGURATION
@@ -1062,12 +1044,12 @@
           });
         }
 
-        // --- Render Markdown notes (GROUPED BY REPO) ---
+        // --- Render Markdown notes (ACCORDION BY REPO) ---
         mdLoading.remove();
         if (!allMds.length) {
           mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
         } else {
-          // Group by repo name
+          // Group by repo
           const grouped = {};
           repos.forEach(repo => {
             const repoName = repo.name;
@@ -1080,7 +1062,6 @@
             }
           });
 
-          // Render grouped list
           Object.keys(grouped).sort().forEach(repoName => {
             const group = grouped[repoName];
             const folderDiv = document.createElement('div');
@@ -1092,7 +1073,7 @@
                 <span class="date">${group.branch}</span>
                 <span class="arrow">›</span>
               </button>
-              <div class="note-body" style="max-height:0; overflow:hidden; transition:max-height .2s ease;">
+              <div class="note-body" style="max-height:0; overflow:hidden; transition:max-height 0.3s ease;">
                 <div class="note-body-inner" style="padding:0;"></div>
               </div>
             `;
@@ -1120,10 +1101,15 @@
               bodyInner.appendChild(fileItem);
 
               const fileHead = fileItem.querySelector('.note-head');
-              const fileBody = fileItem.querySelector('.note-body');
               const fileInner = fileItem.querySelector('.note-body-inner');
 
               fileHead.addEventListener('click', async () => {
+                // Close all other file items in this folder
+                const siblings = bodyInner.querySelectorAll(':scope > .note-item');
+                siblings.forEach(sibling => {
+                  if (sibling !== fileItem) sibling.classList.remove('open');
+                });
+
                 fileItem.classList.toggle('open');
                 if (fileItem.classList.contains('open') && fileInner.textContent === 'Loading...') {
                   try {
@@ -1143,13 +1129,19 @@
               folderDiv.classList.toggle('open');
               const arrow = headBtn.querySelector('.arrow');
               if (folderDiv.classList.contains('open')) {
-                arrow.style.transform = 'rotate(90deg)';
-                bodyDiv.style.maxHeight = '2000px';
+                // Expand folder: show files
+                bodyDiv.style.maxHeight = bodyDiv.scrollHeight + 'px';
               } else {
-                arrow.style.transform = 'rotate(0deg)';
+                // Collapse folder: hide everything and also close any open file inside
                 bodyDiv.style.maxHeight = '0';
+                // Close all open files within
+                const openFiles = bodyDiv.querySelectorAll(':scope .note-item.open');
+                openFiles.forEach(f => f.classList.remove('open'));
               }
             });
+
+            // Initial max-height for the folder (closed)
+            bodyDiv.style.maxHeight = '0';
           });
 
           showToast(`Loaded ${allMds.length} Markdown notes`);
