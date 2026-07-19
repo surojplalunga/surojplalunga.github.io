@@ -4,13 +4,11 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="google-site-verification" content="LmDuHRLN4YA9g_KAbDncpsDMtjQYz4wssIrEcprwoUk" />
-
   <title>Suroj Plalunga – Terminal Portfolio</title>
   <meta name="description" content="BSc Mathematics student · Neovim & Arch Linux user · Terminal-themed developer portfolio. Explore projects, PDFs, Markdown notes, and more.">
   <meta name="theme-color" content="#1A1B26">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='0.9em' font-size='90'>💻</text></svg>">
-
   <meta property="og:title" content="Suroj Plalunga – Terminal Portfolio">
   <meta property="og:description" content="BSc Mathematics student · Neovim & Arch Linux user · Terminal-themed developer portfolio.">
   <meta property="og:url" content="https://surojplalunga.github.io">
@@ -80,6 +78,7 @@
     .tree-item .icon { width:14px; text-align:center; flex-shrink:0; }
     .tree-item:hover { background:var(--panel); color:var(--text); }
     .tree-item.active { background:var(--panel); color:var(--text); border-left-color:var(--blue); }
+    .tree-item.focused { background:var(--panel); color:var(--text); }
     .sidebar-hint { margin-top:20px; padding:12px 18px; border-top:1px solid var(--line); font-size:0.68rem; color:var(--text-dimmer); line-height:1.9; }
     .sidebar-hint kbd { background:var(--panel); border:1px solid var(--line); border-radius:3px; padding:1px 5px; color:var(--text-dim); }
     .sidebar-backdrop { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:49; }
@@ -124,7 +123,10 @@
     .loading-placeholder { color:var(--text-dimmer); text-align:center; padding:20px; border:1px dashed var(--line); border-radius:4px; margin:20px 0; animation:pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    /* Notes list */
+    /* Filter input */
+    .notes-filter { width:100%; background:var(--bg); border:1px solid var(--line); color:var(--text); font-family:inherit; font-size:0.9rem; padding:8px; margin-bottom:14px; border-radius:4px; }
+    .notes-filter:focus { border-color:var(--blue); outline:none; }
+
     .notes-file-list { display:flex; flex-direction:column; gap:4px; }
     .notes-file-item {
       padding:8px 12px; background:var(--bg2); border:1px solid var(--line); border-radius:4px;
@@ -145,7 +147,6 @@
     .zathura-bar button:hover { background:var(--red); color:var(--bg2); }
     iframe.pdf-frame { flex:1; width:100%; border:none; background:#ececec; }
 
-    /* Contact */
     .contact-block { font-size:0.92rem; } .contact-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
     .contact-row .k { color:var(--red); width:80px; flex-shrink:0; } .contact-row .v { color:var(--text); }
     .copy-btn { background:none; border:1px solid var(--line); color:var(--text-dimmer); border-radius:3px; padding:2px 8px; font-size:0.68rem; cursor:pointer; margin-left:auto; transition:background-color .15s; }
@@ -227,7 +228,7 @@
 
 <div class="workspace">
   <div class="sidebar-backdrop" id="sidebar-backdrop"></div>
-  <aside class="sidebar" id="sidebar">
+  <aside class="sidebar" id="sidebar" tabindex="0">
     <div class="path">~/suroj-plalunga</div>
     <button class="tree-item active" data-section="about" data-mode="NORMAL" data-color="#7AA2F7" role="tab" aria-selected="true"><span class="icon">▸</span> about.md</button>
     <button class="tree-item" data-section="stack" data-mode="COMMAND" data-color="#E0AF68" role="tab" aria-selected="false"><span class="icon">▸</span> stack.toml</button>
@@ -236,7 +237,7 @@
     <button class="tree-item" data-section="now" data-mode="INSERT" data-color="#7DCFFF" role="tab" aria-selected="false"><span class="icon">▸</span> now.md</button>
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false"><span class="icon">▸</span> contact.txt</button>
     <div class="sidebar-hint">
-      <div><kbd>j</kbd>/<kbd>k</kbd> or <kbd>1</kbd>–<kbd>6</kbd> navigate</div>
+      <div><kbd>j</kbd>/<kbd>k</kbd> navigate · <kbd>Enter</kbd> select · <kbd>Esc</kbd> close</div>
       <div><kbd>SPC</kbd> <kbd>e</kbd> / <kbd>Ctrl+E</kbd> toggle explorer</div>
       <div><kbd>:</kbd> command mode</div>
     </div>
@@ -308,7 +309,8 @@
         <div class="zathura-viewer" id="zathura-viewer"><div class="zathura-bar"><span>[zathura] <span id="zathura-title" style="color:var(--cyan)"></span></span><button onclick="closeMedia()">[q] quit</button></div><iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen loading="lazy"></iframe></div>
         <div class="pdf-grid" id="pdf-list-container"><div class="loading-placeholder" id="loading-pdfs">⟳ loading PDFs…</div></div>
         <h2>## raw_markdown</h2>
-        <p class="dim">Click a file to open it in a side panel (multiple notes allowed).</p>
+        <p class="dim">Filter notes — click to open in side panel</p>
+        <input type="text" class="notes-filter" id="notes-filter" placeholder="filter by name or repo...">
         <div id="notes-list"><div class="loading-placeholder" id="loading-markdown">⟳ loading Markdown files…</div></div>
         <div id="retry-notes" style="display:none; margin-top:10px;"><button onclick="loadContent()" style="background:var(--panel);border:1px solid var(--line);color:var(--blue);padding:6px 12px;">Retry</button></div>
       </section>
@@ -360,14 +362,17 @@
   <ul>
     <li><span class="key">j</span> / <span class="key">k</span> — navigate sections</li>
     <li><span class="key">1</span>–<span class="key">6</span> — jump to section</li>
+    <li><span class="key">gg</span> / <span class="key">G</span> — scroll main content to top / bottom</li>
+    <li><span class="key">Ctrl+F</span> / <span class="key">Ctrl+B</span> — page down / up (main content)</li>
     <li><span class="key">Ctrl+E</span> / <span class="key">SPC e</span> — toggle file tree</li>
+    <li>Sidebar: <span class="key">j/k</span> move, <span class="key">Enter</span> select, <span class="key">Esc</span> close</li>
     <li><span class="key">:</span> — open command bar</li>
-    <li><span class="key">:about</span> / <span class="key">:stack</span> / <span class="key">:projects</span> / <span class="key">:notes</span> / <span class="key">:now</span> / <span class="key">:contact</span></li>
+    <li><span class="key">:about</span> / <span class="key">:stack</span> / … — jump to buffer</li>
     <li><span class="key">:resume</span> — download resume</li>
     <li><span class="key">:help</span> — this window</li>
-    <li><span class="key">:grep &lt;query&gt;</span> — search across projects, PDFs, notes</li>
+    <li><span class="key">:grep &lt;query&gt;</span> — search</li>
+    <li>Markdown viewer: <span class="key">Ctrl+U</span>/<span class="key">D</span> scroll, <span class="key">Ctrl+W</span> close</li>
     <li><span class="key">:q</span> / <span class="key">:wq</span> — you know what happens :)</li>
-    <li><span class="key">Ctrl+U</span> / <span class="key">Ctrl+D</span> — scroll markdown viewer</li>
   </ul>
 </div>
 
@@ -463,23 +468,47 @@ tick();
 setInterval(tick, 60000);
 
 /* ==========================================================
-   SIDEBAR TOGGLE (Ctrl+E & SPC e)
+   SIDEBAR TOGGLE & KEYBOARD NAVIGATION
    ========================================================== */
 const sidebar = document.getElementById('sidebar');
 const backdrop = document.getElementById('sidebar-backdrop');
 const btnToggleSidebar = document.getElementById('btn-toggle-sidebar');
 
-function openSidebar() { sidebar.classList.add('open'); backdrop.classList.add('visible'); }
+function openSidebar() { sidebar.classList.add('open'); backdrop.classList.add('visible'); sidebar.focus(); }
 function closeSidebar() { sidebar.classList.remove('open'); backdrop.classList.remove('visible'); }
 function toggleSidebar() {
-  sidebar.classList.contains('open')
-    ? (closeSidebar(), showToast('Neo-tree closed'))
-    : (openSidebar(), showToast('Neo-tree opened'));
+  sidebar.classList.contains('open') ? (closeSidebar(), showToast('Neo-tree closed')) : (openSidebar(), showToast('Neo-tree opened'));
 }
 btnToggleSidebar.addEventListener('click', toggleSidebar);
 backdrop.addEventListener('click', closeSidebar);
 
-// Ctrl+E (and Cmd+E for Mac)
+// Sidebar keyboard navigation
+sidebar.addEventListener('keydown', (e) => {
+  if (!sidebar.classList.contains('open')) return;
+  const items = Array.from(sidebar.querySelectorAll('.tree-item'));
+  const currentFocus = document.activeElement;
+  let idx = items.indexOf(currentFocus);
+
+  if (e.key === 'j' || e.key === 'ArrowDown') {
+    e.preventDefault();
+    if (idx < items.length - 1) items[idx + 1].focus();
+  } else if (e.key === 'k' || e.key === 'ArrowUp') {
+    e.preventDefault();
+    if (idx > 0) items[idx - 1].focus();
+  } else if (e.key === 'Enter') {
+    e.preventDefault();
+    if (currentFocus && currentFocus.classList.contains('tree-item')) {
+      currentFocus.click();
+      closeSidebar();
+    }
+  } else if (e.key === 'Escape') {
+    e.preventDefault();
+    closeSidebar();
+    document.querySelector('.main-content').focus();
+  }
+});
+
+// Ctrl+E toggle
 document.addEventListener('keydown', (e) => {
   if (e.key === 'e' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
@@ -523,10 +552,10 @@ function goTo(section) {
   if (!item) return;
   if (section !== 'notes') closeMedia();
 
-  treeItems.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected', 'false'); });
+  treeItems.forEach(t => { t.classList.remove('active'); t.setAttribute('aria-selected','false'); });
   buffers.forEach(b => b.classList.remove('active'));
   item.classList.add('active');
-  item.setAttribute('aria-selected', 'true');
+  item.setAttribute('aria-selected','true');
   document.querySelector(`.buffer[data-section="${section}"]`).classList.add('active');
   modePill.textContent = item.dataset.mode;
   modePill.style.background = item.dataset.color;
@@ -540,38 +569,81 @@ treeItems.forEach(item => item.addEventListener('click', () => goTo(item.dataset
 renderBufferline();
 
 /* ==========================================================
-   KEYBOARD NAVIGATION & LEADER KEY
+   GLOBAL KEYBOARD SHORTCUTS (VIM STYLE)
    ========================================================== */
 let leaderActive = false, leaderTimeout;
-document.addEventListener('keydown', e => {
-  if (cmdbar.classList.contains('show')) return;
-  if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
 
-  // Ctrl+U / Ctrl+D for markdown viewer scroll (if panel is open)
+document.addEventListener('keydown', (e) => {
+  // Ignore if typing in inputs
+  if (cmdbar.classList.contains('show')) return;
+  if (document.activeElement && (document.activeElement.tagName === 'INPUT' || document.activeElement.tagName === 'TEXTAREA' || document.activeElement === sidebar)) return;
+
+  // Ctrl+U / Ctrl+D for markdown viewer scroll (if panel open)
   if ((e.key === 'u' || e.key === 'd') && (e.ctrlKey || e.metaKey)) {
     if (document.getElementById('md-viewer-panel').classList.contains('show')) {
       e.preventDefault();
       const viewerContent = document.getElementById('md-viewer-content');
-      const scrollAmount = 300;
-      if (e.key === 'u') viewerContent.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
-      else viewerContent.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+      const amount = e.key === 'u' ? -300 : 300;
+      viewerContent.scrollBy({ top: amount, behavior: 'smooth' });
     }
     return;
   }
 
+  // Ctrl+F / Ctrl+B page down/up for main content
+  if ((e.key === 'f' || e.key === 'b') && (e.ctrlKey || e.metaKey)) {
+    e.preventDefault();
+    const main = document.querySelector('.main-content');
+    const amount = e.key === 'f' ? window.innerHeight * 0.8 : -window.innerHeight * 0.8;
+    main.scrollBy({ top: amount, behavior: 'smooth' });
+    return;
+  }
+
+  // gg / G (two-key sequences)
+  if (e.key === 'g' && !e.repeat) {
+    // start of possible "gg" sequence
+    const handler = (ev) => {
+      if (ev.key === 'g') {
+        document.querySelector('.main-content').scrollTo({ top: 0, behavior: 'smooth' });
+        showToast('Top');
+      }
+      document.removeEventListener('keydown', handler);
+    };
+    document.addEventListener('keydown', handler, { once: true });
+    return;
+  }
+  if (e.key === 'G' && !e.ctrlKey && !e.metaKey) {
+    e.preventDefault();
+    document.querySelector('.main-content').scrollTo({ top: document.querySelector('.main-content').scrollHeight, behavior: 'smooth' });
+    showToast('Bottom');
+    return;
+  }
+
+  // Ctrl+W close markdown viewer
+  if (e.key === 'w' && (e.ctrlKey || e.metaKey)) {
+    if (document.getElementById('md-viewer-panel').classList.contains('show')) {
+      e.preventDefault();
+      closeMdViewer();
+      showToast('Viewer closed');
+    }
+    return;
+  }
+
+  // Leader key (Space)
   if (e.key === ' ' || e.key === 'Spacebar') {
     e.preventDefault();
     leaderActive = true;
     clearTimeout(leaderTimeout);
-    leaderTimeout = setTimeout(() => (leaderActive = false), 800);
+    leaderTimeout = setTimeout(() => leaderActive = false, 800);
     return;
   }
+
   if (leaderActive) {
     if (e.key.toLowerCase() === 'e') { e.preventDefault(); toggleSidebar(); }
     leaderActive = false;
     return;
   }
 
+  // Standard navigation
   if (e.key === 'j') {
     e.preventDefault();
     currentIndex = Math.min(currentIndex + 1, treeItems.length - 1);
@@ -580,7 +652,7 @@ document.addEventListener('keydown', e => {
     e.preventDefault();
     currentIndex = Math.max(currentIndex - 1, 0);
     goTo(treeItems[currentIndex].dataset.section);
-  } else if (['1', '2', '3', '4', '5', '6'].includes(e.key)) {
+  } else if (['1','2','3','4','5','6'].includes(e.key)) {
     const i = parseInt(e.key) - 1;
     if (treeItems[i]) goTo(treeItems[i].dataset.section);
   } else if (e.key === ':') {
@@ -634,7 +706,7 @@ cmdInput.addEventListener('keydown', e => {
 
 function executeCommand(raw) {
   const cmd = raw.toLowerCase();
-  if (['about', 'stack', 'projects', 'notes', 'now', 'contact'].includes(cmd)) { goTo(cmd); }
+  if (['about','stack','projects','notes','now','contact'].includes(cmd)) { goTo(cmd); }
   else if (cmd === 'q' || cmd === 'q!' || cmd === 'wq') { showToast("can't quit real life that easily :)"); }
   else if (cmd === 'e' || cmd === 'explore' || cmd === 'neotree') { toggleSidebar(); }
   else if (cmd === 'help') { openHelp(); }
@@ -757,9 +829,7 @@ function buildSearchIndex(repos) {
 
 function performSearch(query) {
   if (!query) return;
-  const results = searchIndex.filter(item =>
-    item.text.toLowerCase().includes(query.toLowerCase())
-  );
+  const results = searchIndex.filter(item => item.text.toLowerCase().includes(query.toLowerCase()));
   searchResultsDiv.innerHTML = '';
   if (!results.length) {
     searchResultsDiv.innerHTML = '<p class="dim">No matches found.</p>';
@@ -770,9 +840,7 @@ function performSearch(query) {
       div.innerHTML = `<span class="type">[${item.type}]</span> <strong>${item.name}</strong> <span class="dim">${item.repo ? 'in ' + item.repo : ''}</span>`;
       div.addEventListener('click', () => {
         if (item.type === 'pdf') openMedia(item.url, item.name);
-        else if (item.type === 'md') {
-          openMdViewer(item.url, item.name);
-        }
+        else if (item.type === 'md') openMdViewer(item.url, item.name);
         else if (item.link) window.open(item.link, '_blank');
         closeSearch();
       });
@@ -793,36 +861,26 @@ const mdOverlay = document.getElementById('md-viewer-overlay');
 const mdPanel = document.getElementById('md-viewer-panel');
 const mdTabsContainer = document.getElementById('md-viewer-tabs');
 const mdViewerContent = document.getElementById('md-viewer-content');
-
-// Store open tabs: { url: { title, url, contentElement } }
 const openTabs = {};
 let activeTabUrl = null;
 
 function openMdViewer(url, title) {
-  // If already open, switch to it
-  if (openTabs[url]) {
-    switchTab(url);
-    return;
-  }
-
-  // Create a new content container
+  if (openTabs[url]) { switchTab(url); return; }
   const contentDiv = document.createElement('div');
   contentDiv.className = 'markdown-body';
   contentDiv.style.display = 'none';
   contentDiv.style.width = '100%';
-  contentDiv.style.height = '100%';
   mdViewerContent.appendChild(contentDiv);
   contentDiv.innerHTML = 'Loading...';
 
   openTabs[url] = { title, url, contentElement: contentDiv };
 
-  // Add tab
   const tab = document.createElement('div');
   tab.className = 'md-viewer-tab';
   tab.innerHTML = `${title} <span class="tab-close">✕</span>`;
-  tab.addEventListener('click', (e) => {
-    if (e.target.classList.contains('tab-close')) {
-      e.stopPropagation();
+  tab.addEventListener('click', (ev) => {
+    if (ev.target.classList.contains('tab-close')) {
+      ev.stopPropagation();
       closeTab(url);
     } else {
       switchTab(url);
@@ -830,20 +888,14 @@ function openMdViewer(url, title) {
   });
   mdTabsContainer.appendChild(tab);
 
-  // Fetch and render
   fetch(url)
     .then(res => {
       if (!res.ok) throw new Error('Failed to fetch');
       return res.text();
     })
-    .then(rawText => {
-      renderMarkdown(rawText, contentDiv, url);
-    })
-    .catch(() => {
-      contentDiv.innerHTML = '<p class="dim">Could not load note.</p>';
-    });
+    .then(rawText => renderMarkdown(rawText, contentDiv, url))
+    .catch(() => { contentDiv.innerHTML = '<p class="dim">Could not load note.</p>'; });
 
-  // Show panel and switch to this tab
   if (!mdPanel.classList.contains('show')) {
     mdPanel.classList.add('show');
     mdOverlay.classList.add('show');
@@ -852,73 +904,69 @@ function openMdViewer(url, title) {
 }
 
 function switchTab(url) {
-  // Hide all content
-  Object.values(openTabs).forEach(tab => tab.contentElement.style.display = 'none');
-  // Remove active class from all tabs
+  Object.values(openTabs).forEach(t => t.contentElement.style.display = 'none');
   mdTabsContainer.querySelectorAll('.md-viewer-tab').forEach(t => t.classList.remove('active'));
-  // Show selected content
   if (openTabs[url]) {
     openTabs[url].contentElement.style.display = 'block';
-    // Find the tab element and make it active
     const tabIndex = Object.keys(openTabs).indexOf(url);
     const tabs = mdTabsContainer.querySelectorAll('.md-viewer-tab');
     if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+    activeTabUrl = url;
   }
-  activeTabUrl = url;
 }
 
 function closeTab(url) {
   if (!openTabs[url]) return;
-  // Remove content
   openTabs[url].contentElement.remove();
   delete openTabs[url];
-
-  // Remove tab
-  const tabIndex = Object.keys(openTabs).indexOf(url); // index before removal
-  const tabs = mdTabsContainer.querySelectorAll('.md-viewer-tab');
-  // Remove the correct tab (order might be tricky, but we can find by text)
-  // Simpler: rebuild tabs completely?
-  // We'll just remove all and rebuild from openTabs
   rebuildTabs();
-
-  // If closed the active tab, switch to another
   if (activeTabUrl === url) {
-    const remainingUrls = Object.keys(openTabs);
-    if (remainingUrls.length > 0) {
-      switchTab(remainingUrls[remainingUrls.length - 1]); // last one
-    } else {
-      closeMdViewer();
-    }
+    const remaining = Object.keys(openTabs);
+    if (remaining.length) switchTab(remaining[remaining.length-1]);
+    else closeMdViewer();
   }
 }
 
 function rebuildTabs() {
   mdTabsContainer.innerHTML = '';
-  Object.entries(openTabs).forEach(([url, { title }]) => {
-    const tab = document.createElement('div');
-    tab.className = 'md-viewer-tab';
-    if (url === activeTabUrl) tab.classList.add('active');
-    tab.innerHTML = `${title} <span class="tab-close">✕</span>`;
-    tab.addEventListener('click', (e) => {
-      if (e.target.classList.contains('tab-close')) {
-        e.stopPropagation();
-        closeTab(url);
+  Object.entries(openTabs).forEach(([u, { title }]) => {
+    const t = document.createElement('div');
+    t.className = 'md-viewer-tab';
+    if (u === activeTabUrl) t.classList.add('active');
+    t.innerHTML = `${title} <span class="tab-close">✕</span>`;
+    t.addEventListener('click', (ev) => {
+      if (ev.target.classList.contains('tab-close')) {
+        ev.stopPropagation();
+        closeTab(u);
       } else {
-        switchTab(url);
+        switchTab(u);
       }
     });
-    mdTabsContainer.appendChild(tab);
+    mdTabsContainer.appendChild(t);
   });
 }
 
 function closeMdViewer() {
   mdPanel.classList.remove('show');
   mdOverlay.classList.remove('show');
-  // Optionally clear all tabs? Keep them in memory for next open
-  // For now, leave tabs as they are; when panel opens again they'll reappear.
 }
-
 mdOverlay.addEventListener('click', closeMdViewer);
+
+/* ==========================================================
+   NOTES FILTER
+   ========================================================== */
+function setupNotesFilter() {
+  const filterInput = document.getElementById('notes-filter');
+  if (!filterInput) return;
+  filterInput.addEventListener('input', () => {
+    const query = filterInput.value.toLowerCase();
+    const items = document.querySelectorAll('.notes-file-item');
+    items.forEach(item => {
+      const text = item.textContent.toLowerCase();
+      item.style.display = query ? (text.includes(query) ? 'flex' : 'none') : 'flex';
+    });
+  });
+}
 
 /* ==========================================================
    LOAD NOW.MD
@@ -991,26 +1039,17 @@ async function loadContent() {
     repos.forEach(repo => {
       const branch = repo.defaultBranch || 'main';
       (repo.pdfs || []).forEach(pdf => {
-        allPdfs.push({
-          name: pdf.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`,
-          size: pdf.size, repo: repo.name
-        });
+        allPdfs.push({ name: pdf.path, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${pdf.path}`, size: pdf.size, repo: repo.name });
       });
       (repo.mds || []).forEach(md => {
-        allMds.push({
-          name: md.path,
-          url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`,
-          repo: repo.name
-        });
+        allMds.push({ name: md.path, url: `https://raw.githubusercontent.com/${GITHUB_USER}/${repo.name}/${branch}/${md.path}`, repo: repo.name });
       });
     });
 
     pdfLoading.remove();
     if (!allPdfs.length) {
       pdfContainer.innerHTML += '<div class="loading-placeholder">No PDFs found.</div>';
-      pdfCount.textContent = '0';
-      pdfSub.textContent = 'No PDFs found across repos';
+      pdfCount.textContent = '0'; pdfSub.textContent = 'No PDFs found across repos';
     } else {
       pdfCount.textContent = allPdfs.length + ' PDFs';
       pdfSub.textContent = 'Click to view in Zathura';
@@ -1023,7 +1062,7 @@ async function loadContent() {
       });
     }
 
-    // Markdown files list
+    // Markdown list with filter
     mdLoading.remove();
     if (!allMds.length) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
@@ -1035,12 +1074,11 @@ async function loadContent() {
         const item = document.createElement('div');
         item.className = 'notes-file-item';
         item.innerHTML = `<span>📄 ${md.name}</span><span class="repo-badge">${md.repo}</span>`;
-        item.addEventListener('click', () => {
-          openMdViewer(md.url, md.name);
-        });
+        item.addEventListener('click', () => openMdViewer(md.url, md.name));
         listDiv.appendChild(item);
       });
       mdContainer.appendChild(listDiv);
+      setupNotesFilter();
       showToast(`Loaded ${allMds.length} Markdown notes`);
     }
 
