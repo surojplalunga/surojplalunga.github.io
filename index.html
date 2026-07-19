@@ -173,6 +173,13 @@
     .floating-panel .close-btn:hover { color:#ff9e9e; }
     .search-item { padding:6px 0; border-bottom:1px solid var(--line); cursor:pointer; transition:background .12s; } .search-item:hover { background:var(--panel); color:var(--blue); } .search-item .type { color:var(--text-dimmer); font-size:0.7rem; }
 
+    /* Keymaps table */
+    .keymaps-table { width:100%; border-collapse: collapse; margin-top:12px; }
+    .keymaps-table th, .keymaps-table td { padding:8px 12px; text-align:left; border-bottom:1px solid var(--line); font-size:0.85rem; }
+    .keymaps-table th { color:var(--yellow); font-weight:600; }
+    .keymaps-table .key-col { color:var(--magenta); }
+    .keymaps-table .action-col { color:var(--text); }
+
     .md-viewer-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:250; }
     .md-viewer-overlay.show { display:block; }
     .md-viewer-panel { position:fixed; top:0; right:0; width:50%; min-width:360px; height:100%; background:var(--bg2); border-left:2px solid var(--blue); z-index:260; transform:translateX(100%); transition:transform 0.25s ease; display:flex; flex-direction:column; box-shadow:-4px 0 20px rgba(0,0,0,0.6); }
@@ -216,6 +223,7 @@
     <button class="tree-item" data-section="projects" data-mode="INSERT" data-color="#9ECE6A" role="tab" aria-selected="false"><span class="icon">▾</span> projects/</button>
     <button class="tree-item" data-section="notes" data-mode="VISUAL" data-color="#BB9AF7" role="tab" aria-selected="false"><span class="icon">▾</span> notes/</button>
     <button class="tree-item" data-section="now" data-mode="INSERT" data-color="#7DCFFF" role="tab" aria-selected="false"><span class="icon">▸</span> now.md</button>
+    <button class="tree-item" data-section="keymaps" data-mode="NORMAL" data-color="#7DCFFF" role="tab" aria-selected="false"><span class="icon">▸</span> keymaps.md</button>
     <button class="tree-item" data-section="contact" data-mode="REPLACE" data-color="#F7768E" role="tab" aria-selected="false"><span class="icon">▸</span> contact.txt</button>
     <div class="sidebar-hint">
       <div><kbd>j</kbd>/<kbd>k</kbd> navigate · <kbd>Enter</kbd> select · <kbd>Esc</kbd> close</div>
@@ -304,6 +312,14 @@
         <div class="lines" id="now-content"><p class="loading-placeholder">⟳ loading now.md…</p></div>
       </section>
 
+      <!-- KEYMAPS -->
+      <section class="buffer" data-section="keymaps" role="tabpanel">
+        <span class="filename-tag">~/suroj-plalunga/keymaps.md — 1 buffer</span>
+        <h1>keymaps</h1>
+        <p class="dim">Current keyboard shortcuts</p>
+        <div id="keymaps-table-container"></div>
+      </section>
+
       <!-- CONTACT -->
       <section class="buffer" data-section="contact" role="tabpanel">
         <span class="filename-tag">~/suroj-plalunga/contact.txt</span>
@@ -329,7 +345,7 @@
 
 <div class="cmdbar" id="cmdbar" role="dialog" aria-label="command input">
   <span class="colon">:</span>
-  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · contact · help" aria-label="command">
+  <input type="text" id="cmd-input" placeholder="about · stack · projects · notes · now · keymaps · contact · help" aria-label="command">
   <span class="cursor-blink"></span>
   <span class="cmd-hint">enter to run · esc to cancel</span>
 </div>
@@ -342,7 +358,7 @@
   <h3>📖 Help</h3>
   <ul>
     <li><span class="key">j</span> / <span class="key">k</span> — next / previous buffer</li>
-    <li><span class="key">1</span>–<span class="key">6</span> — jump to buffer</li>
+    <li><span class="key">1</span>–<span class="key">7</span> — jump to buffer</li>
     <li><span class="key">gg</span> / <span class="key">G</span> — scroll to top / bottom</li>
     <li><span class="key">Ctrl+F</span> / <span class="key">Ctrl+B</span> — page down / up</li>
     <li><span class="key">Ctrl+E</span> / <span class="key">SPC e</span> — toggle file tree</li>
@@ -380,18 +396,14 @@ const NOW_MD_URL = `https://raw.githubusercontent.com/${GITHUB_USER}/now/main/no
 window.RESUME_URL = RESUME_URL;
 
 /* ==========================================================
-   CUSTOM KEYMAPS – CHANGE ANY BINDING HERE
-   Format: 'key' (or 'Ctrl+Key', 'Alt+Key') : 'action'
-   Available actions: 'next', 'prev', 'goto1'–'goto6', 'sidebar', 'command',
-                     'scrollUp', 'scrollDown', 'pageUp', 'pageDown', 'top', 'bottom',
-                     'closeMd', 'scrollMdUp', 'scrollMdDown', 'closeAll'
+   CUSTOM KEYMAPS
    ========================================================== */
 const KEYMAP = {
   'j': 'next',
   'k': 'prev',
-  '1': 'goto1', '2': 'goto2', '3': 'goto3', '4': 'goto4', '5': 'goto5', '6': 'goto6',
+  '1': 'goto1', '2': 'goto2', '3': 'goto3', '4': 'goto4', '5': 'goto5', '6': 'goto6', '7': 'goto7',
   ':': 'command',
-  'g': 'top',    // gg is handled by a sequence
+  'g': 'top',
   'G': 'bottom',
   'Ctrl+f': 'pageDown',
   'Ctrl+b': 'pageUp',
@@ -402,7 +414,6 @@ const KEYMAP = {
   'Escape': 'closeAll',
 };
 
-// Actions for the leader key (SPC + key)
 const LEADER_MAP = {
   'e': 'sidebar',
 };
@@ -522,7 +533,7 @@ const statusFile = document.getElementById('status-file');
 const bufferline = document.getElementById('bufferline');
 const fileNames = {
   about: 'about.md', stack: 'stack.toml', projects: 'projects/',
-  notes: 'notes/', now: 'now.md', contact: 'contact.txt'
+  notes: 'notes/', now: 'now.md', keymaps: 'keymaps.md', contact: 'contact.txt'
 };
 let currentIndex = 0;
 
@@ -567,7 +578,7 @@ renderBufferline();
 /* ==========================================================
    KEYMAP EXECUTION ENGINE
    ========================================================== */
-let ggPending = false;  // for 'gg' sequence
+let ggPending = false;
 
 function executeAction(action) {
   switch (action) {
@@ -584,7 +595,8 @@ function executeAction(action) {
     case 'goto3': goTo('projects'); break;
     case 'goto4': goTo('notes'); break;
     case 'goto5': goTo('now'); break;
-    case 'goto6': goTo('contact'); break;
+    case 'goto6': goTo('keymaps'); break;
+    case 'goto7': goTo('contact'); break;
     case 'sidebar': toggleSidebar(); break;
     case 'command': openCmd(); break;
     case 'scrollUp':
@@ -623,18 +635,16 @@ function executeAction(action) {
 }
 
 document.addEventListener('keydown', (e) => {
-  // Ignore if typing in inputs (except the sidebar which has its own handler)
   if (cmdbar.classList.contains('show')) return;
   if (document.activeElement && (
     document.activeElement.tagName === 'INPUT' ||
     document.activeElement.tagName === 'TEXTAREA' ||
     document.activeElement === sidebar)) return;
 
-  // Handle 'gg' sequence
+  // gg sequence
   if (e.key === 'g' && !e.ctrlKey && !e.metaKey && !ggPending) {
     ggPending = true;
-    setTimeout(() => { ggPending = false; }, 500); // reset if second 'g' doesn't come
-    // Listen for second 'g'
+    setTimeout(() => { ggPending = false; }, 500);
     const handler = (ev) => {
       if (ev.key === 'g') {
         e.preventDefault();
@@ -646,17 +656,15 @@ document.addEventListener('keydown', (e) => {
     document.addEventListener('keydown', handler, { once: true });
     return;
   } else if (ggPending && e.key !== 'g') {
-    ggPending = false; // canceled
+    ggPending = false;
   }
 
-  // Build key string (e.g. 'Ctrl+j', 'Shift+K')
   let key = e.key;
   if (e.ctrlKey || e.metaKey) key = 'Ctrl+' + key;
   if (e.altKey) key = 'Alt+' + key;
-  // Normalize 'Ctrl+e' etc.
   key = key.toLowerCase();
 
-  // Leader key (Space) – wait for next key
+  // Leader key (Space)
   if (e.key === ' ' || e.key === 'Spacebar') {
     e.preventDefault();
     const leaderHandler = (ev) => {
@@ -671,7 +679,6 @@ document.addEventListener('keydown', (e) => {
     return;
   }
 
-  // Check KEYMAP
   if (KEYMAP[key]) {
     e.preventDefault();
     executeAction(KEYMAP[key]);
@@ -719,13 +726,13 @@ cmdInput.addEventListener('keydown', e => {
 
 function executeCommand(raw) {
   const cmd = raw.toLowerCase();
-  if (['about','stack','projects','notes','now','contact'].includes(cmd)) { goTo(cmd); }
+  if (['about','stack','projects','notes','now','keymaps','contact'].includes(cmd)) { goTo(cmd); }
   else if (cmd === 'q' || cmd === 'q!' || cmd === 'wq') { showToast("can't quit real life that easily :)"); }
   else if (cmd === 'e' || cmd === 'explore' || cmd === 'neotree') { toggleSidebar(); }
   else if (cmd === 'help') { openHelp(); }
   else if (cmd === 'resume') { window.open(RESUME_URL, '_blank'); showToast('Opening resume…'); }
   else if (cmd.startsWith('grep ')) { performSearch(raw.slice(5).trim()); }
-  else if (cmd === '') { showToast('commands: about · stack · projects · notes · now · contact · help · resume'); }
+  else if (cmd === '') { showToast('commands: about · stack · projects · notes · now · keymaps · contact · help · resume'); }
   else { showToast('E492: not an editor command: ' + cmd); }
 }
 
@@ -980,6 +987,49 @@ function setupNotesFilter() {
     });
   });
 }
+
+/* ==========================================================
+   BUILD KEYMAPS TABLE
+   ========================================================== */
+function buildKeymapsTable() {
+  const container = document.getElementById('keymaps-table-container');
+  if (!container) return;
+
+  const actionLabels = {
+    next: 'Next buffer', prev: 'Previous buffer',
+    goto1: 'Go to about', goto2: 'Go to stack', goto3: 'Go to projects',
+    goto4: 'Go to notes', goto5: 'Go to now', goto6: 'Go to keymaps', goto7: 'Go to contact',
+    command: 'Open command bar', sidebar: 'Toggle sidebar',
+    scrollUp: 'Scroll up', scrollDown: 'Scroll down',
+    pageUp: 'Page up', pageDown: 'Page down',
+    top: 'Scroll to top', bottom: 'Scroll to bottom',
+    closeMd: 'Close Markdown viewer',
+    scrollMdUp: 'Scroll MD viewer up', scrollMdDown: 'Scroll MD viewer down',
+    closeAll: 'Close all panels'
+  };
+
+  let html = '<table class="keymaps-table"><tr><th>Key</th><th>Action</th></tr>';
+
+  // Normal keymaps
+  for (const [key, action] of Object.entries(KEYMAP)) {
+    if (key === 'g') continue; // 'gg' is special, we show it manually
+    html += `<tr><td class="key-col">${key}</td><td class="action-col">${actionLabels[action] || action}</td></tr>`;
+  }
+
+  // Add 'gg' manually
+  html += `<tr><td class="key-col">gg</td><td class="action-col">Scroll to top</td></tr>`;
+
+  // Leader keymaps
+  for (const [key, action] of Object.entries(LEADER_MAP)) {
+    html += `<tr><td class="key-col">SPC ${key}</td><td class="action-col">${actionLabels[action] || action}</td></tr>`;
+  }
+
+  html += '</table>';
+  container.innerHTML = html;
+}
+
+// Call after page load
+window.addEventListener('load', buildKeymapsTable);
 
 /* ==========================================================
    LOAD NOW.MD
