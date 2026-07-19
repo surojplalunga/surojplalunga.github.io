@@ -245,6 +245,12 @@
     .note-item.open .note-body { max-height: 600px; overflow-y: auto; }
     .note-body-inner { padding: 0 0 16px; color: var(--text-dim); font-size: 0.88rem; line-height: 1.7; }
 
+    /* Repository folder styling */
+    .repo-folder > .note-body { padding-left: 8px; }
+    .repo-folder > .note-head { font-weight: 600; color: var(--blue); }
+    .repo-folder .note-item { border-bottom: none; }
+    .repo-folder .note-head { padding: 8px 0; font-size: 0.82rem; }
+
     .pdf-grid { display: grid; gap: 10px; margin-bottom: 32px; }
     .pdf-item { background: var(--bg2); border: 1px solid var(--line); padding: 12px 16px; border-radius: 4px; cursor: pointer; font-size: 0.85rem; color: var(--blue); transition: all 0.2s; display: flex; justify-content: space-between; align-items: center; }
     .pdf-item:hover { border-color: var(--blue); background: var(--panel); }
@@ -1056,30 +1062,96 @@
           });
         }
 
-        // --- Render Markdown notes ---
+        // --- Render Markdown notes (GROUPED BY REPO) ---
         mdLoading.remove();
         if (!allMds.length) {
           mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
         } else {
-          allMds.sort((a, b) => a.name.localeCompare(b.name));
-          allMds.forEach(md => {
-            const noteDiv = document.createElement('div');
-            noteDiv.className = 'note-item';
-            noteDiv.innerHTML = `<button class="note-head"><span>${md.name}</span><span class="date">${md.repo}</span><span class="arrow">›</span></button><div class="note-body"><div class="note-body-inner markdown-body">Loading...</div></div>`;
-            mdContainer.appendChild(noteDiv);
-            const headBtn = noteDiv.querySelector('.note-head');
-            const bodyInner = noteDiv.querySelector('.note-body-inner');
-            headBtn.addEventListener('click', async () => {
-              noteDiv.classList.toggle('open');
-              if (noteDiv.classList.contains('open') && bodyInner.textContent === 'Loading...') {
-                try {
-                  const res = await fetch(md.url);
-                  if (!res.ok) throw new Error('Failed to fetch');
-                  renderMarkdown(await res.text(), bodyInner, md.url);
-                } catch (err) { bodyInner.textContent = 'Error loading content.'; }
+          // Group by repo name
+          const grouped = {};
+          repos.forEach(repo => {
+            const repoName = repo.name;
+            const repoMds = allMds.filter(md => md.repo === repoName);
+            if (repoMds.length) {
+              grouped[repoName] = {
+                branch: repo.defaultBranch || 'main',
+                files: repoMds
+              };
+            }
+          });
+
+          // Render grouped list
+          Object.keys(grouped).sort().forEach(repoName => {
+            const group = grouped[repoName];
+            const folderDiv = document.createElement('div');
+            folderDiv.className = 'note-item repo-folder';
+
+            folderDiv.innerHTML = `
+              <button class="note-head repo-head">
+                <span>📁 ${repoName}/</span>
+                <span class="date">${group.branch}</span>
+                <span class="arrow">›</span>
+              </button>
+              <div class="note-body" style="max-height:0; overflow:hidden; transition:max-height .2s ease;">
+                <div class="note-body-inner" style="padding:0;"></div>
+              </div>
+            `;
+            mdContainer.appendChild(folderDiv);
+
+            const headBtn = folderDiv.querySelector('.repo-head');
+            const bodyDiv = folderDiv.querySelector('.note-body');
+            const bodyInner = bodyDiv.querySelector('.note-body-inner');
+
+            group.files.sort((a, b) => a.name.localeCompare(b.name));
+            group.files.forEach(md => {
+              const fileItem = document.createElement('div');
+              fileItem.className = 'note-item';
+              fileItem.style.borderBottom = 'none';
+              fileItem.innerHTML = `
+                <button class="note-head">
+                  <span style="padding-left:20px;">📄 ${md.name.split('/').pop()}</span>
+                  <span class="date dim">${md.name}</span>
+                  <span class="arrow">›</span>
+                </button>
+                <div class="note-body">
+                  <div class="note-body-inner">Loading...</div>
+                </div>
+              `;
+              bodyInner.appendChild(fileItem);
+
+              const fileHead = fileItem.querySelector('.note-head');
+              const fileBody = fileItem.querySelector('.note-body');
+              const fileInner = fileItem.querySelector('.note-body-inner');
+
+              fileHead.addEventListener('click', async () => {
+                fileItem.classList.toggle('open');
+                if (fileItem.classList.contains('open') && fileInner.textContent === 'Loading...') {
+                  try {
+                    const res = await fetch(md.url);
+                    if (!res.ok) throw new Error('Failed to fetch');
+                    const rawText = await res.text();
+                    renderMarkdown(rawText, fileInner, md.url);
+                  } catch (err) {
+                    fileInner.textContent = 'Error loading content.';
+                  }
+                }
+              });
+            });
+
+            // Toggle folder
+            headBtn.addEventListener('click', () => {
+              folderDiv.classList.toggle('open');
+              const arrow = headBtn.querySelector('.arrow');
+              if (folderDiv.classList.contains('open')) {
+                arrow.style.transform = 'rotate(90deg)';
+                bodyDiv.style.maxHeight = '2000px';
+              } else {
+                arrow.style.transform = 'rotate(0deg)';
+                bodyDiv.style.maxHeight = '0';
               }
             });
           });
+
           showToast(`Loaded ${allMds.length} Markdown notes`);
         }
 
