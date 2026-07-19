@@ -124,7 +124,7 @@
     .loading-placeholder { color:var(--text-dimmer); text-align:center; padding:20px; border:1px dashed var(--line); border-radius:4px; margin:20px 0; animation:pulse 1.5s infinite; }
     @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
 
-    /* Notes list (simple file list) */
+    /* Notes list */
     .notes-file-list { display:flex; flex-direction:column; gap:4px; }
     .notes-file-item {
       padding:8px 12px; background:var(--bg2); border:1px solid var(--line); border-radius:4px;
@@ -134,40 +134,16 @@
     .notes-file-item:hover { background:var(--panel); border-color:var(--blue); }
     .notes-file-item .repo-badge { color:var(--text-dimmer); font-size:0.7rem; }
 
-    /* PDFs */
     .pdf-grid { display:grid; gap:10px; margin-bottom:32px; }
     .pdf-item { background:var(--bg2); border:1px solid var(--line); padding:12px 16px; border-radius:4px; cursor:pointer; font-size:0.85rem; color:var(--blue); transition:all 0.2s; display:flex; justify-content:space-between; align-items:center; }
     .pdf-item:hover { border-color:var(--blue); background:var(--panel); } .pdf-item .size { color:var(--text-dimmer); font-size:0.7rem; }
 
-    /* Zathura viewer */
     .zathura-viewer { display:none; flex-direction:column; height:600px; border:1px solid var(--line); border-radius:4px; overflow:hidden; margin-bottom:32px; }
     .zathura-viewer.active { display:flex; }
     .zathura-bar { background:var(--bg2); padding:8px 12px; font-size:0.75rem; color:var(--text-dim); display:flex; justify-content:space-between; border-bottom:1px solid var(--line); align-items:center; }
     .zathura-bar button { background:var(--panel); border:1px solid var(--line); color:var(--red); border-radius:3px; padding:2px 8px; cursor:pointer; transition:.2s; }
     .zathura-bar button:hover { background:var(--red); color:var(--bg2); }
     iframe.pdf-frame { flex:1; width:100%; border:none; background:#ececec; }
-
-    /* Markdown viewer side panel */
-    .md-viewer-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:250; }
-    .md-viewer-overlay.show { display:block; }
-    .md-viewer-panel {
-      position:fixed; top:0; right:0; width:50%; min-width:360px; height:100%;
-      background:var(--bg2); border-left:2px solid var(--blue);
-      z-index:260; transform:translateX(100%); transition:transform 0.25s ease;
-      display:flex; flex-direction:column;
-      padding:0; box-shadow:-4px 0 20px rgba(0,0,0,0.6);
-    }
-    .md-viewer-panel.show { transform:translateX(0); }
-    .md-viewer-header {
-      display:flex; justify-content:space-between; align-items:center;
-      padding:12px 16px; border-bottom:1px solid var(--line); background:var(--bg2);
-    }
-    .md-viewer-title { color:var(--cyan); font-size:0.88rem; font-weight:600; }
-    .md-viewer-close { background:none; border:none; color:var(--red); font-size:1.2rem; cursor:pointer; }
-    .md-viewer-content {
-      flex:1; overflow-y:auto; padding:24px 28px;
-      color:var(--text); font-size:0.88rem; line-height:1.7;
-    }
 
     /* Contact */
     .contact-block { font-size:0.92rem; } .contact-row { display:flex; align-items:center; gap:10px; padding:7px 0; border-bottom:1px dashed var(--line); }
@@ -197,6 +173,38 @@
     .floating-panel .close-btn:hover { color:#ff9e9e; }
     .search-item { padding:6px 0; border-bottom:1px solid var(--line); cursor:pointer; transition:background .12s; } .search-item:hover { background:var(--panel); color:var(--blue); } .search-item .type { color:var(--text-dimmer); font-size:0.7rem; }
 
+    /* Markdown viewer side panel with tabs */
+    .md-viewer-overlay { display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.5); z-index:250; }
+    .md-viewer-overlay.show { display:block; }
+    .md-viewer-panel {
+      position:fixed; top:0; right:0; width:50%; min-width:360px; height:100%;
+      background:var(--bg2); border-left:2px solid var(--blue);
+      z-index:260; transform:translateX(100%); transition:transform 0.25s ease;
+      display:flex; flex-direction:column;
+      box-shadow:-4px 0 20px rgba(0,0,0,0.6);
+    }
+    .md-viewer-panel.show { transform:translateX(0); }
+    .md-viewer-tabs {
+      display:flex; overflow-x:auto; background:var(--bg2); border-bottom:1px solid var(--line);
+    }
+    .md-viewer-tab {
+      padding:8px 14px; color:var(--text-dim); font-size:0.78rem; cursor:pointer;
+      border-right:1px solid var(--line); white-space:nowrap; display:flex; align-items:center; gap:4px;
+    }
+    .md-viewer-tab.active { color:var(--text); background:var(--panel); border-bottom:2px solid var(--blue); }
+    .md-viewer-tab .tab-close { font-size:0.7rem; color:var(--text-dimmer); opacity:0; transition:opacity .15s; }
+    .md-viewer-tab:hover .tab-close { opacity:1; }
+    .md-viewer-header {
+      display:flex; justify-content:space-between; align-items:center;
+      padding:8px 16px; border-bottom:1px solid var(--line); background:var(--bg2);
+    }
+    .md-viewer-title { color:var(--cyan); font-size:0.88rem; font-weight:600; }
+    .md-viewer-close { background:none; border:none; color:var(--red); font-size:1.2rem; cursor:pointer; }
+    .md-viewer-content {
+      flex:1; overflow-y:auto; padding:24px 28px;
+      color:var(--text); font-size:0.88rem; line-height:1.7;
+    }
+
     @media print { .statusline,.sidebar,.bufferline,.cmdbar,.toast-container,.scroll-top-btn,.floating-panel,.zathura-viewer,.copy-btn,.md-viewer-panel,.md-viewer-overlay { display:none!important; } body { background:white; color:black; font-family:'JetBrains Mono',monospace; } .buffer { padding:0; max-width:100%; display:block!important; opacity:1!important; } .buffer .lines { border-left:none; } .line::before { display:none; } .main-content { overflow:visible; } a { color:black; border-bottom:none; } }
     @media (max-width:768px) { .statusline { font-size:0.68rem; gap:8px; padding:0 8px; } .statusline .clock { display:none; } .mode-pill { padding:2px 6px; font-size:0.65rem; } .sidebar { position:fixed; top:34px; left:0; bottom:0; width:260px; transform:translateX(-100%); z-index:100; box-shadow:2px 0 10px rgba(0,0,0,0.5); } .sidebar.open { transform:translateX(0); } .sidebar-backdrop.visible { display:block; } .buffer { padding:24px 20px 80px; max-width:100%; } .buffer h1 { font-size:2rem; } .lines { border-left:none; margin-left:0; } .line { padding-left:0; } .line::before { display:none; } .toml-row { flex-direction:column; gap:4px; } .toml-key { width:auto; } .proj-grid { grid-template-columns:1fr; } .zathura-viewer { height:400px; } .cmdbar .cmd-hint { display:none; } .toast-container { bottom:60px; right:10px; max-width:calc(100% - 20px); } .floating-panel { width:90vw; max-height:70vh; } .md-viewer-panel { width:85vw; min-width:auto; } }
   </style>
@@ -206,7 +214,7 @@
 <div class="statusline">
   <span class="mono mode-pill" id="mode-pill" style="color:#1A1B26;background:#7AA2F7;">NORMAL</span>
   <span class="sep">│</span>
-  <button id="btn-toggle-sidebar" class="status-btn" title="Toggle Sidebar (Space + e / Ctrl+E)">[☰]</button>
+  <button id="btn-toggle-sidebar" class="status-btn" title="Toggle Sidebar (Ctrl+E / SPC e)">[☰]</button>
   <span class="sep">│</span>
   <span id="status-file">about.md</span>
   <span class="sep">│</span>
@@ -300,7 +308,7 @@
         <div class="zathura-viewer" id="zathura-viewer"><div class="zathura-bar"><span>[zathura] <span id="zathura-title" style="color:var(--cyan)"></span></span><button onclick="closeMedia()">[q] quit</button></div><iframe class="pdf-frame" id="pdf-frame" src="" allowfullscreen loading="lazy"></iframe></div>
         <div class="pdf-grid" id="pdf-list-container"><div class="loading-placeholder" id="loading-pdfs">⟳ loading PDFs…</div></div>
         <h2>## raw_markdown</h2>
-        <p class="dim">Click a file to open it in a side panel</p>
+        <p class="dim">Click a file to open it in a side panel (multiple notes allowed).</p>
         <div id="notes-list"><div class="loading-placeholder" id="loading-markdown">⟳ loading Markdown files…</div></div>
         <div id="retry-notes" style="display:none; margin-top:10px;"><button onclick="loadContent()" style="background:var(--panel);border:1px solid var(--line);color:var(--blue);padding:6px 12px;">Retry</button></div>
       </section>
@@ -359,6 +367,7 @@
     <li><span class="key">:help</span> — this window</li>
     <li><span class="key">:grep &lt;query&gt;</span> — search across projects, PDFs, notes</li>
     <li><span class="key">:q</span> / <span class="key">:wq</span> — you know what happens :)</li>
+    <li><span class="key">Ctrl+U</span> / <span class="key">Ctrl+D</span> — scroll markdown viewer</li>
   </ul>
 </div>
 
@@ -368,14 +377,15 @@
   <div id="search-results"></div>
 </div>
 
-<!-- Markdown Viewer Side Panel -->
+<!-- Markdown Viewer Side Panel with Tabs -->
 <div class="md-viewer-overlay" id="md-viewer-overlay"></div>
 <div class="md-viewer-panel" id="md-viewer-panel">
-  <div class="md-viewer-header">
+  <div class="md-viewer-tabs" id="md-viewer-tabs"></div>
+  <div class="md-viewer-header" style="display:none;">
     <span class="md-viewer-title" id="md-viewer-title">📄 note.md</span>
     <button class="md-viewer-close" onclick="closeMdViewer()">✕</button>
   </div>
-  <div class="md-viewer-content markdown-body" id="md-viewer-content">Loading...</div>
+  <div class="md-viewer-content markdown-body" id="md-viewer-content">No file selected</div>
 </div>
 
 <script>
@@ -469,7 +479,7 @@ function toggleSidebar() {
 btnToggleSidebar.addEventListener('click', toggleSidebar);
 backdrop.addEventListener('click', closeSidebar);
 
-// Ctrl+E shortcut (and Cmd+E for Mac)
+// Ctrl+E (and Cmd+E for Mac)
 document.addEventListener('keydown', (e) => {
   if (e.key === 'e' && (e.ctrlKey || e.metaKey)) {
     e.preventDefault();
@@ -530,12 +540,24 @@ treeItems.forEach(item => item.addEventListener('click', () => goTo(item.dataset
 renderBufferline();
 
 /* ==========================================================
-   KEYBOARD NAVIGATION & LEADER KEY (SPC e still works)
+   KEYBOARD NAVIGATION & LEADER KEY
    ========================================================== */
 let leaderActive = false, leaderTimeout;
 document.addEventListener('keydown', e => {
   if (cmdbar.classList.contains('show')) return;
   if (document.activeElement && ['INPUT', 'TEXTAREA'].includes(document.activeElement.tagName)) return;
+
+  // Ctrl+U / Ctrl+D for markdown viewer scroll (if panel is open)
+  if ((e.key === 'u' || e.key === 'd') && (e.ctrlKey || e.metaKey)) {
+    if (document.getElementById('md-viewer-panel').classList.contains('show')) {
+      e.preventDefault();
+      const viewerContent = document.getElementById('md-viewer-content');
+      const scrollAmount = 300;
+      if (e.key === 'u') viewerContent.scrollBy({ top: -scrollAmount, behavior: 'smooth' });
+      else viewerContent.scrollBy({ top: scrollAmount, behavior: 'smooth' });
+    }
+    return;
+  }
 
   if (e.key === ' ' || e.key === 'Spacebar') {
     e.preventDefault();
@@ -749,7 +771,6 @@ function performSearch(query) {
       div.addEventListener('click', () => {
         if (item.type === 'pdf') openMedia(item.url, item.name);
         else if (item.type === 'md') {
-          // Open the markdown viewer side panel with this file
           openMdViewer(item.url, item.name);
         }
         else if (item.link) window.open(item.link, '_blank');
@@ -766,18 +787,49 @@ document.addEventListener('click', e => {
 });
 
 /* ==========================================================
-   MARKDOWN VIEWER SIDE PANEL
+   MARKDOWN VIEWER SIDE PANEL (TABBED)
    ========================================================== */
 const mdOverlay = document.getElementById('md-viewer-overlay');
 const mdPanel = document.getElementById('md-viewer-panel');
-const mdViewerTitle = document.getElementById('md-viewer-title');
+const mdTabsContainer = document.getElementById('md-viewer-tabs');
 const mdViewerContent = document.getElementById('md-viewer-content');
 
+// Store open tabs: { url: { title, url, contentElement } }
+const openTabs = {};
+let activeTabUrl = null;
+
 function openMdViewer(url, title) {
-  mdViewerTitle.textContent = title;
-  mdViewerContent.innerHTML = 'Loading...';
-  mdOverlay.classList.add('show');
-  mdPanel.classList.add('show');
+  // If already open, switch to it
+  if (openTabs[url]) {
+    switchTab(url);
+    return;
+  }
+
+  // Create a new content container
+  const contentDiv = document.createElement('div');
+  contentDiv.className = 'markdown-body';
+  contentDiv.style.display = 'none';
+  contentDiv.style.width = '100%';
+  contentDiv.style.height = '100%';
+  mdViewerContent.appendChild(contentDiv);
+  contentDiv.innerHTML = 'Loading...';
+
+  openTabs[url] = { title, url, contentElement: contentDiv };
+
+  // Add tab
+  const tab = document.createElement('div');
+  tab.className = 'md-viewer-tab';
+  tab.innerHTML = `${title} <span class="tab-close">✕</span>`;
+  tab.addEventListener('click', (e) => {
+    if (e.target.classList.contains('tab-close')) {
+      e.stopPropagation();
+      closeTab(url);
+    } else {
+      switchTab(url);
+    }
+  });
+  mdTabsContainer.appendChild(tab);
+
   // Fetch and render
   fetch(url)
     .then(res => {
@@ -785,16 +837,85 @@ function openMdViewer(url, title) {
       return res.text();
     })
     .then(rawText => {
-      renderMarkdown(rawText, mdViewerContent, url);
+      renderMarkdown(rawText, contentDiv, url);
     })
     .catch(() => {
-      mdViewerContent.innerHTML = '<p class="dim">Could not load note.</p>';
+      contentDiv.innerHTML = '<p class="dim">Could not load note.</p>';
     });
+
+  // Show panel and switch to this tab
+  if (!mdPanel.classList.contains('show')) {
+    mdPanel.classList.add('show');
+    mdOverlay.classList.add('show');
+  }
+  switchTab(url);
+}
+
+function switchTab(url) {
+  // Hide all content
+  Object.values(openTabs).forEach(tab => tab.contentElement.style.display = 'none');
+  // Remove active class from all tabs
+  mdTabsContainer.querySelectorAll('.md-viewer-tab').forEach(t => t.classList.remove('active'));
+  // Show selected content
+  if (openTabs[url]) {
+    openTabs[url].contentElement.style.display = 'block';
+    // Find the tab element and make it active
+    const tabIndex = Object.keys(openTabs).indexOf(url);
+    const tabs = mdTabsContainer.querySelectorAll('.md-viewer-tab');
+    if (tabs[tabIndex]) tabs[tabIndex].classList.add('active');
+  }
+  activeTabUrl = url;
+}
+
+function closeTab(url) {
+  if (!openTabs[url]) return;
+  // Remove content
+  openTabs[url].contentElement.remove();
+  delete openTabs[url];
+
+  // Remove tab
+  const tabIndex = Object.keys(openTabs).indexOf(url); // index before removal
+  const tabs = mdTabsContainer.querySelectorAll('.md-viewer-tab');
+  // Remove the correct tab (order might be tricky, but we can find by text)
+  // Simpler: rebuild tabs completely?
+  // We'll just remove all and rebuild from openTabs
+  rebuildTabs();
+
+  // If closed the active tab, switch to another
+  if (activeTabUrl === url) {
+    const remainingUrls = Object.keys(openTabs);
+    if (remainingUrls.length > 0) {
+      switchTab(remainingUrls[remainingUrls.length - 1]); // last one
+    } else {
+      closeMdViewer();
+    }
+  }
+}
+
+function rebuildTabs() {
+  mdTabsContainer.innerHTML = '';
+  Object.entries(openTabs).forEach(([url, { title }]) => {
+    const tab = document.createElement('div');
+    tab.className = 'md-viewer-tab';
+    if (url === activeTabUrl) tab.classList.add('active');
+    tab.innerHTML = `${title} <span class="tab-close">✕</span>`;
+    tab.addEventListener('click', (e) => {
+      if (e.target.classList.contains('tab-close')) {
+        e.stopPropagation();
+        closeTab(url);
+      } else {
+        switchTab(url);
+      }
+    });
+    mdTabsContainer.appendChild(tab);
+  });
 }
 
 function closeMdViewer() {
-  mdOverlay.classList.remove('show');
   mdPanel.classList.remove('show');
+  mdOverlay.classList.remove('show');
+  // Optionally clear all tabs? Keep them in memory for next open
+  // For now, leave tabs as they are; when panel opens again they'll reappear.
 }
 
 mdOverlay.addEventListener('click', closeMdViewer);
@@ -820,7 +941,7 @@ async function loadNow() {
 }
 
 /* ==========================================================
-   STATIC MANIFEST LOADER (WITH SIDE PANEL NOTES)
+   STATIC MANIFEST LOADER
    ========================================================== */
 async function loadContent() {
   const projGrid = document.getElementById('proj-grid-container');
@@ -902,7 +1023,7 @@ async function loadContent() {
       });
     }
 
-    // --- Render Markdown files as a simple list (click to open in side panel) ---
+    // Markdown files list
     mdLoading.remove();
     if (!allMds.length) {
       mdContainer.innerHTML += '<div class="loading-placeholder">No Markdown files found.</div>';
